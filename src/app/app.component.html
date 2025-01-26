@@ -1,0 +1,39 @@
+<nz-layout class="app-layout">
+  <nz-sider
+    class="menu-sidebar"
+    nzCollapsible
+    nzWidth="256px"
+    nzBreakpoint="md"
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+  >
+    <div
+      nz-flex
+      nzHorizontal="true"
+      nzAlign="center"
+      nzJustify="space-between"
+    >
+    @if (!isCollapsed) {
+      <span nz-typography><strong>FILTROS</strong></span>
+    }
+
+      <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+        <nz-icon
+          class="trigger"
+          [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+        />
+      </span>
+    </div>
+
+    @if (!isCollapsed) {
+      <app-filter-form></app-filter-form>
+    }
+  </nz-sider>
+  <nz-layout>
+    <nz-content>
+      <div class="inner-content">
+        <app-pdf-viewer></app-pdf-viewer>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>
