@@ -30,12 +30,12 @@ export class FilterService {
     return this.filterDataSubject.getValue();
   }
 
-  applyFilters(filtros: any): Observable<any> {
+  reporteFacturacion(filtros: any): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
 
-    return this.http.post<Filter>(`${this.apiUrl}/generar-reporte`, filtros, { headers });
+    return this.http.post<Filter>(`${this.apiUrl}/reporte-facturacion`, filtros, { headers });
   }
 
 

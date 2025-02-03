@@ -135,7 +135,7 @@ export class FilterFormComponent implements OnInit {
         "SECTOR-NOMBRE": this.sectores.find((s) => s.rowid === f.sector)?.label || ''
       };
 
-      this.filterService.applyFilters(filtros).subscribe(
+      this.filterService.reporteFacturacion(filtros).subscribe(
         (response) => {
           console.log('Respuesta:', response);
           this.filterService.setFilterData(response);
