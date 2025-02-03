@@ -1,116 +1,131 @@
 <div nz-flex nzVertical="true" nzGap="20px" [formGroup]="filterForm">
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>PERIODO</strong></span>
-      <nz-select
-        formControlName="periodo"
-        [nzMaxTagCount]="3"
-        [nzMaxTagPlaceholder]="tagPlaceHolderPeriodo"
-        nzMode="multiple"
-        nzPlaceHolder="Selecciona..."
-      >
-        @for (item of listOfOption; track item) {
-        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-        }
-      </nz-select>
-      <ng-template #tagPlaceHolderPeriodo let-selectedList
-        >{{ selectedList.length }} + Seleccionados</ng-template
-      >
-    </div>
-  
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>LOCALIDAD</strong></span>
-      <nz-select
-        formControlName="localidad"
-        [nzMaxTagCount]="3"
-        [nzMaxTagPlaceholder]="tagPlaceHolderLocal"
-        nzMode="multiple"
-        nzPlaceHolder="Selecciona..."
-      >
-        @for (item of listOfOption; track item) {
-        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-        }
-      </nz-select>
-      <ng-template #tagPlaceHolderLocal let-selectedList
-        >{{ selectedList.length }} + Seleccionados</ng-template
-      >
-    </div>
-  
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>SECTOR</strong></span>
-      <nz-select
-        formControlName="sector"
-        [nzMaxTagCount]="3"
-        [nzMaxTagPlaceholder]="tagPlaceHolderSector"
-        nzMode="multiple"
-        nzPlaceHolder="Selecciona..."
-      >
-        @for (item of listOfOption; track item) {
-        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-        }
-      </nz-select>
-      <ng-template #tagPlaceHolderSector let-selectedList
-        >{{ selectedList.length }} + Seleccionados</ng-template
-      >
-    </div>
-  
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>RUTA</strong></span>
-      <nz-select
-        formControlName="ruta"
-        [nzMaxTagCount]="3"
-        [nzMaxTagPlaceholder]="tagPlaceHolderRuta"
-        nzMode="multiple"
-        nzPlaceHolder="Selecciona..."
-      >
-        @for (item of listOfOption; track item) {
-        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-        }
-      </nz-select>
-      <ng-template #tagPlaceHolderRuta let-selectedList
-        >{{ selectedList.length }} + Seleccionados</ng-template
-      >
-    </div>
-  
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>LEÍDO</strong></span>
-      <nz-select
-        formControlName="leido"
-        [nzMaxTagCount]="3"
-        [nzMaxTagPlaceholder]="tagPlaceHolderLeido"
-        nzMode="multiple"
-        nzPlaceHolder="Selecciona..."
-      >
-        @for (item of listOfOption; track item) {
-        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-        }
-      </nz-select>
-      <ng-template #tagPlaceHolderLeido let-selectedList
-        >{{ selectedList.length }} + Seleccionados</ng-template
-      >
-    </div>
-  
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>FACTURADO</strong></span>
-      <nz-select
-        formControlName="facturado"
-        [nzMaxTagCount]="3"
-        [nzMaxTagPlaceholder]="tagPlaceHolderFact"
-        nzMode="multiple"
-        nzPlaceHolder="Selecciona..."
-      >
-        @for (item of listOfOption; track item) {
-        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-        }
-      </nz-select>
-      <ng-template #tagPlaceHolderFact let-selectedList
-        >{{ selectedList.length }} + Seleccionados</ng-template
-      >
-    </div>
-  
-    <div nz-flex nzHorizontal="true" nzAlign="center" nzJustify="center">
-      <button nz-button nzType="primary" (click)="applyFilters()">
-        Aplicar Filtros
-      </button>
-    </div>
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>PERIODO*</strong></span>
+    <nz-select
+      formControlName="periodo"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolderPeriodo"
+      nzPlaceHolder="Selecciona..."
+    >
+      @for (item of periodos; track item) {
+      <nz-option [nzLabel]="item.name" [nzValue]="item.rowid"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderPeriodo let-selectedList
+      >{{ selectedList.length }} + Seleccionados</ng-template
+    >
+    @if(submitted && filterForm.get('periodo')?.invalid &&
+    !filterForm.get('periodo')?.touched &&
+    filterForm.get('periodo')?.hasError('required')) {
+    <div style="color: red">El campo Periodo es obligatorio.</div>
+    }
   </div>
-  
+
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>LOCALIDAD*</strong></span>
+    <nz-select
+      formControlName="localidad"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolderLocal"
+      nzPlaceHolder="Selecciona..."
+      (ngModelChange)="onLocalidadChange($event)"
+    >
+      @for (item of localidades; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderLocal let-selectedList
+      >{{ selectedList.length }} + Seleccionados</ng-template
+    >
+    @if(submitted && filterForm.get('localidad')?.invalid &&
+    !filterForm.get('localidad')?.touched &&
+    filterForm.get('localidad')?.hasError('required')){
+    <div style="color: red">El campo Localidad es obligatorio.</div>
+    }
+  </div>
+
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>SECTOR*</strong></span>
+    <nz-select
+      formControlName="sector"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolderSector"
+      nzPlaceHolder="Selecciona..."
+      [nzDisabled]="filterForm.get('localidad')?.value"
+    >
+      @for (item of sectores; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderSector let-selectedList
+      >{{ selectedList.length }} + Seleccionados</ng-template
+    >
+    @if(submitted && filterForm.get('sector')?.invalid &&
+    !filterForm.get('sector')?.touched &&
+    filterForm.get('sector')?.hasError('required')){
+    <div style="color: red">El campo Sector es obligatorio.</div>
+    }
+  </div>
+
+  @if(typeReport !== 'report1') {
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>RUTA</strong></span>
+    <nz-select
+      formControlName="ruta"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolderRuta"
+      nzMode="multiple"
+      nzPlaceHolder="Selecciona..."
+    >
+      @for (item of listOfOption; track item) {
+      <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderRuta let-selectedList
+      >{{ selectedList.length }} + Seleccionados</ng-template
+    >
+  </div>
+
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>LEÍDO</strong></span>
+    <nz-select
+      formControlName="leido"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolderLeido"
+      nzMode="multiple"
+      nzPlaceHolder="Selecciona..."
+    >
+      @for (item of listOfOption; track item) {
+      <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderLeido let-selectedList
+      >{{ selectedList.length }} + Seleccionados</ng-template
+    >
+  </div>
+
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>FACTURADO</strong></span>
+    <nz-select
+      formControlName="facturado"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolderFact"
+      nzMode="multiple"
+      nzPlaceHolder="Selecciona..."
+    >
+      @for (item of listOfOption; track item) {
+      <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderFact let-selectedList
+      >{{ selectedList.length }} + Seleccionados</ng-template
+    >
+  </div>
+  }
+
+  <div nz-flex nzHorizontal="true" nzAlign="center" nzJustify="center">
+    <button nz-button nzType="primary" [nzLoading]="isLoading" (click)="applyFilters()">
+      Aplicar Filtros
+    </button>
+  </div>
+</div>

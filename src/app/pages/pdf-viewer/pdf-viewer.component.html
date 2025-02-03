@@ -1,1 +1,21 @@
-<ngx-extended-pdf-viewer [src]="pdfSrc" useBrowserLocale="true"></ngx-extended-pdf-viewer>
+@if (!isLoading && pdfSrc && !errorMsg) {
+<ngx-extended-pdf-viewer [src]="pdfSrc" useBrowserLocale="true"
+[showOpenFileButton]="false"
+[showTextEditor]="false"
+[showStampEditor]="false"
+[showDrawEditor]="false"
+[showHighlightEditor]="false"></ngx-extended-pdf-viewer>
+} @else if(isLoading) {
+  <div class="loading-spinner">
+    <span class="loader"></span>
+    <p>Cargando el reporte, por favor espera...</p>
+  </div>
+} @else if(!isLoading && !pdfSrc && !errorMsg) {
+  <div class="loading-spinner">
+    <p>Parece que aún no hay un reporte disponible. Por favor, completa el formulario para generarlo y verlo aquí.</p>
+  </div>
+} @else if(!isLoading && !pdfSrc && errorMsg) {
+  <div class="loading-spinner">
+    <p>¡Ups! No encontramos un reporte con esos datos. Prueba ingresando otra información en el formulario.</p>
+  </div>
+}
