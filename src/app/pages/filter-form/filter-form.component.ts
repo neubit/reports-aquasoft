@@ -19,6 +19,7 @@ import {
 } from '@angular/forms';
 import { catchError, forkJoin } from 'rxjs';
 import { Localidad, Periodo, Sector } from '../../models/filters';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-filter-form',
@@ -49,9 +50,10 @@ export class FilterFormComponent implements OnInit {
   submitted = false;
   isLoading = false;
 
-  typeReport = 'report1';
+  typeReport: string = 'facturacion';
 
-  constructor(private fb: FormBuilder, private filterService: FilterService) {
+
+  constructor(private fb: FormBuilder, private filterService: FilterService, private route: ActivatedRoute) {
     this.filterForm = this.fb.group({
       periodo: new FormControl<string[]>([], Validators.required),
       localidad: new FormControl<string[]>([], Validators.required),
@@ -63,6 +65,11 @@ export class FilterFormComponent implements OnInit {
   }
 
   ngOnInit() {
+      // Leer el parámetro desde la URL
+      this.route.queryParams.subscribe(params => {
+        this.typeReport = params['typeReport'] || 'facturacion'; // Si no existe, usa 'defaultReport'
+        console.log('Tipo de Reporte:', this.typeReport);
+      });
     this.loadFilters();
   }
 
