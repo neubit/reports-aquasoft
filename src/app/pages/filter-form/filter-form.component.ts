@@ -18,7 +18,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { catchError, forkJoin } from 'rxjs';
-import { Localidad, Periodo, Sector } from '../../models/filters';
+import { Localidad, Periodo, Ruta, Sector } from '../../models/filters';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -46,29 +46,35 @@ export class FilterFormComponent implements OnInit {
   periodos!: Periodo[];
   localidades!: Localidad[];
   sectores!: Sector[];
+  rutas!: Ruta[];
 
   submitted = false;
   isLoading = false;
 
   typeReport: string = 'facturacion';
+  //verlectura
 
 
   constructor(private fb: FormBuilder, private filterService: FilterService, private route: ActivatedRoute) {
     this.filterForm = this.fb.group({
-      periodo: new FormControl<string[]>([], Validators.required),
-      localidad: new FormControl<string[]>([], Validators.required),
-      sector: new FormControl<string[]>([], Validators.required),
-      ruta: new FormControl<string[]>([]),
-      leido: new FormControl<string[]>([]),
-      facturado: new FormControl<string[]>([]),
+      periodo: new FormControl<string>('', Validators.required),
+      localidad: new FormControl<string>('', Validators.required),
+      sector: new FormControl<string>('', Validators.required),
+      ruta: new FormControl<string>(''),
+      leido: new FormControl<string>(''),
+      facturado: new FormControl<string>(''),
     });
   }
 
   ngOnInit() {
       // Leer el parámetro desde la URL
       this.route.queryParams.subscribe(params => {
-        this.typeReport = params['typeReport'] || 'facturacion'; // Si no existe, usa 'defaultReport'
-        console.log('Tipo de Reporte:', this.typeReport);
+        this.typeReport = params['typeReport'] || 'facturacion'; // Si no existe, usa 'facturacion'
+        if(this.typeReport === "verlectura") {
+          const rutaControl = this.filterForm.get('ruta');
+          rutaControl?.setValidators(Validators.required);
+          rutaControl?.updateValueAndValidity();
+        }
       });
     this.loadFilters();
   }
@@ -86,7 +92,7 @@ export class FilterFormComponent implements OnInit {
           console.error('Error al cargar localidades:', error);
           return []; // Handle error by returning an empty array
         })
-      ),
+      )
     }).subscribe({
       next: ({periodos,localidades }) => {
         this.periodos = periodos;
@@ -101,7 +107,7 @@ export class FilterFormComponent implements OnInit {
   onLocalidadChange(localidadRowId: number): void {
     // Filter sectores based on the selected localidad
     if (localidadRowId) {
-      this.filterForm.get('sector')?.setValue([]);
+      this.filterForm.get('sector')?.setValue('');
       this.filterService
         .getSectores(localidadRowId)
         .pipe(
@@ -120,13 +126,35 @@ export class FilterFormComponent implements OnInit {
     }
   }
 
+  onSectorChange(sectorRowId: number): void {
+    // Filter sectores based on the selected localidad
+    if (sectorRowId ) {
+      this.filterForm.get('ruta')?.setValue('');
+      this.filterService
+        .getRutas(sectorRowId)
+        .pipe(
+          catchError((error) => {
+            console.error('Error al cargar rutas:', error);
+            return []; // Handle error by returning an empty array
+          })
+        )
+        .subscribe((rutas: any[]) => {
+          this.rutas = rutas;
+          this.filterForm.get('ruta')?.enable(); // Enable the sector dropdown
+        });
+    } else {
+      this.sectores = [];
+      this.filterForm.get('sector')?.disable(); // Disable the sector dropdown
+    }
+  }
+
   applyFilters() {
     this.submitted = true;
     if (this.filterForm.valid) {
       this.isLoading = true;
       const f = this.filterForm.value;
 
-      const filtros = {
+      let filtros: any = {
         "PERIODO-ID": f.periodo,
         "PERIODO-NOMBRE": this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
         "LOCALIDAD-ID": f.localidad,
@@ -135,18 +163,35 @@ export class FilterFormComponent implements OnInit {
         "SECTOR-NOMBRE": this.sectores.find((s) => s.rowid === f.sector)?.label || ''
       };
 
-      this.filterService.reporteFacturacion(filtros).subscribe(
-        (response) => {
-          console.log('Respuesta:', response);
-          this.filterService.setFilterData(response);
-          this.isLoading = false;
-        },
-        (error) => {
-          console.error('Error:', error);
-          this.filterService.resetFilterData();
-          this.isLoading = false;
-        }
-      );
+            if(this.typeReport === 'facturacion') {
+
+                this.filterService.reporteFacturacion(filtros).subscribe(
+                  (response) => {
+                    console.log('Respuesta:', response);
+                    this.filterService.setFilterData(response);
+                    this.isLoading = false;
+                  },
+                  (error) => {
+                    console.error('Error:', error);
+                    this.filterService.resetFilterData();
+                    this.isLoading = false;
+                  }
+                );
+          } else if(this.typeReport === 'verlectura') {
+            filtros = {...filtros, 'RUTAS': this.filterForm.controls['ruta'].value }
+              this.filterService.reporteVerificacionLectura(filtros).subscribe(
+                (response) => {
+                  console.log('Respuesta:', response);
+                  this.filterService.setFilterData(response);
+                  this.isLoading = false;
+                },
+                (error) => {
+                  console.error('Error:', error);
+                  this.filterService.resetFilterData();
+                  this.isLoading = false;
+                }
+              );
+          }
     } else {
       console.log('Invalid form');
       this.filterService.resetFilterData();
@@ -154,3 +199,4 @@ export class FilterFormComponent implements OnInit {
     }
   }
 }
+

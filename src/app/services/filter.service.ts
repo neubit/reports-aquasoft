@@ -1,4 +1,4 @@
-import { Periodo } from './../models/filters';
+import { Periodo, Ruta } from './../models/filters';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
@@ -36,6 +36,14 @@ export class FilterService {
     });
 
     return this.http.post<Filter>(`${this.apiUrl}/reporte-facturacion`, filtros, { headers });
+  }
+
+  reporteVerificacionLectura(filtros: any): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<Filter>(`${this.apiUrl}/reporte-verificadorDeLectura`, filtros, { headers });
   }
 
 
@@ -78,5 +86,18 @@ export class FilterService {
       })
     );
   }
+
+    /**
+   * Obtiene la lista de rutas desde el servidor.
+   * @returns Observable con un arreglo de rutas.
+   */
+    getRutas(sector: number): Observable<Ruta[]> {
+      return this.http.get<Ruta[]>(`${this.apiUrl}/rutas/${sector}`).pipe(
+        catchError((error) => {
+          console.error('Error al obtener rutas:', error);
+          return throwError(() => new Error('Error al obtener rutas.'));
+        })
+      );
+    }
 
 }

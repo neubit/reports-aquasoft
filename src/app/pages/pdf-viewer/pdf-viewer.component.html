@@ -10,12 +10,8 @@
     <span class="loader"></span>
     <p>Cargando el reporte, por favor espera...</p>
   </div>
-} @else if(!isLoading && !pdfSrc && !errorMsg) {
-  <div class="loading-spinner">
-    <p>Parece que aún no hay un reporte disponible. Por favor, completa el formulario para generarlo y verlo aquí.</p>
-  </div>
 } @else if(!isLoading && !pdfSrc && errorMsg) {
   <div class="loading-spinner">
-    <p>¡Ups! No encontramos un reporte con esos datos. Prueba ingresando otra información en el formulario.</p>
+    <p>Parece que aún no hay un reporte disponible. Por favor, completa el formulario para generarlo y verlo aquí.</p>
   </div>
 }

@@ -23,20 +23,44 @@ export class PdfViewerComponent {
 
   ngOnInit(): void {
     // Retrieve the shared filter data
-    this.filterService.filterData$.subscribe(data => {
-      if (data) {
-        this.filterData = data;
-        this.isLoading = true;
-        this.errorMsg = false;
-        setTimeout(() => {
-          this.pdfSrc = data.url.replace("http://", "https://");
+    this.filterService.filterData$.subscribe(
+      data => {
+        if (data && data.url) {
+          // Validate the URL format
+          try {
+            const url = new URL(data.url);
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+              throw new Error('Invalid URL protocol');
+            }
+            this.filterData = data;
+            this.isLoading = true;
+            this.errorMsg = false;
+            setTimeout(() => {
+              // Replace "http://" with "https://" for secure URLs
+              this.pdfSrc = data.url.replace("http://", "https://");
+              this.isLoading = false;
+              console.log('Received filter data:', this.filterData);
+            }, 1000);
+          } catch (error) {
+            console.error('Invalid URL:', error);
+            this.pdfSrc = '';
+            this.errorMsg = true;
+            this.isLoading = false;
+          }
+        } else {
+          // Handle missing or invalid data
+          this.pdfSrc = '';
+          this.errorMsg = true;
           this.isLoading = false;
-          console.log('Received filter data:', this.filterData);
-        }, 1000);
-      } else {
+        }
+      },
+      error => {
+        // Handle subscription errors
+        console.error('Error in filterData subscription:', error);
         this.pdfSrc = '';
         this.errorMsg = true;
+        this.isLoading = false;
       }
-    });
+    );
   }
 }

@@ -12,15 +12,20 @@ export interface Filter {
     code: number;
     name: string;
   }
-  
+
   export interface Localidad {
     rowid: number;
     code: string;
     label: string;
   }
-  
+
   export interface Sector {
     rowid: number;
     code: string;
     label: string;
+  }
+
+  export interface Ruta {
+    rowid: number;
+    route: string;
   }
