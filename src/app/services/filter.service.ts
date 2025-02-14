@@ -1,7 +1,7 @@
 import { Periodo, Ruta } from './../models/filters';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
 import { Filter, Localidad, Sector } from '../models/filters';
 
 @Injectable({
@@ -15,6 +15,9 @@ export class FilterService {
 
   private filterDataSubject = new BehaviorSubject<any>(null);
   filterData$ = this.filterDataSubject.asObservable();
+
+  private filterDataLoadingSubject = new BehaviorSubject<boolean>(false);
+  filterDataLoading$ = this.filterDataLoadingSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -30,12 +33,24 @@ export class FilterService {
     return this.filterDataSubject.getValue();
   }
 
+  setLoadingState(isLoading: boolean) {
+    this.filterDataLoadingSubject.next(isLoading);
+  }
+
   reporteFacturacion(filtros: any): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
 
-    return this.http.post<Filter>(`${this.apiUrl}/reporte-facturacion`, filtros, { headers });
+    return this.http.post(`${this.apiUrl}/reporte-facturacion`, filtros, { headers, observe: 'response' })
+      .pipe(
+        map((response: HttpResponse<any>) => {
+          if (response.status === 204) {
+            return { empty: true }; // Indicador de que no hay contenido
+          }
+          return response.body;
+        })
+      );
   }
 
   reporteVerificacionLectura(filtros: any): Observable<any> {
@@ -43,9 +58,16 @@ export class FilterService {
       'Content-Type': 'application/json'
     });
 
-    return this.http.post<Filter>(`${this.apiUrl}/reporte-verificadorDeLectura`, filtros, { headers });
+    return this.http.post(`${this.apiUrl}/reporte-verificadorDeLectura`, filtros, { headers, observe: 'response' })
+      .pipe(
+        map((response: HttpResponse<any>) => {
+          if (response.status === 204) {
+            return { empty: true }; // Indicador de que no hay contenido
+          }
+          return response.body;
+        })
+      );
   }
-
 
 
   /**
@@ -55,7 +77,6 @@ export class FilterService {
   getPeriodos(): Observable<Periodo[]> {
     return this.http.get<Periodo[]>(`${this.apiUrl}/periodo`).pipe(
       catchError((error) => {
-        console.error('Error al obtener periodos:', error);
         return throwError(() => new Error('Error al obtener periodos.'));
       })
     );
@@ -68,7 +89,6 @@ export class FilterService {
   getLocalidades(): Observable<Localidad[]> {
     return this.http.get<Localidad[]>(`${this.apiUrl}/localidad`).pipe(
       catchError((error) => {
-        console.error('Error al obtener localidades:', error);
         return throwError(() => new Error('Error al obtener localidades.'));
       })
     );
@@ -81,7 +101,6 @@ export class FilterService {
   getSectores(localidad: number): Observable<Sector[]> {
     return this.http.get<Sector[]>(`${this.apiUrl}/sector/${localidad}`).pipe(
       catchError((error) => {
-        console.error('Error al obtener sectores:', error);
         return throwError(() => new Error('Error al obtener sectores.'));
       })
     );
@@ -94,7 +113,6 @@ export class FilterService {
     getRutas(sector: number): Observable<Ruta[]> {
       return this.http.get<Ruta[]>(`${this.apiUrl}/rutas/${sector}`).pipe(
         catchError((error) => {
-          console.error('Error al obtener rutas:', error);
           return throwError(() => new Error('Error al obtener rutas.'));
         })
       );

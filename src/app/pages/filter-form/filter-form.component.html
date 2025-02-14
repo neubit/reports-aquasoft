@@ -1,8 +1,34 @@
 <div nz-flex nzVertical="true" nzGap="20px" [formGroup]="filterForm">
+
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>REPORTE*</strong></span>
+    <nz-select
+      formControlName="report"
+      nzShowSearch
+      [nzMaxTagPlaceholder]="tagPlaceHolderReporte"
+      (ngModelChange)="onReportChange($event)"
+      nzPlaceHolder="Selecciona..."
+    >
+      @for (item of listOfReports; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.value"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderReporte let-selectedList
+      >{{ selectedList.length }} + Seleccionados</ng-template
+    >
+    @if(submitted && filterForm.get('report')?.invalid &&
+    !filterForm.get('report')?.touched &&
+    filterForm.get('report')?.hasError('required')) {
+    <div style="color: red">El campo Reporte es obligatorio.</div>
+    }
+  </div>
+  @if(typeReport){
+
   <div nz-col nzSpan="24" nz-flex nzVertical="true">
     <span nz-typography><strong>PERIODO*</strong></span>
     <nz-select
       formControlName="periodo"
+      nzShowSearch
       [nzMaxTagPlaceholder]="tagPlaceHolderPeriodo"
       nzPlaceHolder="Selecciona..."
     >
@@ -24,6 +50,7 @@
     <span nz-typography><strong>LOCALIDAD*</strong></span>
     <nz-select
       formControlName="localidad"
+      nzShowSearch
       [nzMaxTagPlaceholder]="tagPlaceHolderLocal"
       nzPlaceHolder="Selecciona..."
       (ngModelChange)="onLocalidadChange($event)"
@@ -46,6 +73,7 @@
     <span nz-typography><strong>SECTOR*</strong></span>
     <nz-select
       formControlName="sector"
+      nzShowSearch
       [nzMaxTagPlaceholder]="tagPlaceHolderSector"
       nzPlaceHolder="Selecciona..."
       (ngModelChange)="onSectorChange($event)"
@@ -71,6 +99,7 @@
         <span nz-typography><strong>RUTA</strong></span>
         <nz-select
           formControlName="ruta"
+          nzShowSearch
           [nzMaxTagPlaceholder]="tagPlaceHolderRuta"
           nzPlaceHolder="Selecciona..."
           [nzDisabled]="filterForm.get('sector')?.value"
@@ -124,7 +153,7 @@
       >{{ selectedList.length }} + Seleccionados</ng-template
     >
   </div> -->
-
+}
 
   <div nz-flex nzHorizontal="true" nzAlign="center" nzJustify="center">
     <button nz-button nzType="primary" [nzLoading]="isLoading" (click)="applyFilters()">

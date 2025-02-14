@@ -1,66 +1,59 @@
-import { Component } from '@angular/core';
-import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
-import { FilterService } from '../../services/filter.service';
+  import { Component } from '@angular/core';
+  import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+  import { FilterService } from '../../services/filter.service';
 
-@Component({
-  selector: 'app-pdf-viewer',
-  imports: [
-    NgxExtendedPdfViewerModule
-  ],
-  templateUrl: './pdf-viewer.component.html',
-  styleUrl: './pdf-viewer.component.css'
-})
-export class PdfViewerComponent {
-    //pdfSrc = 'https://api-report.japama.net//documents//573c66e1-33bf-4f88-b7cb-9a4828641bb0.pdf';
+  @Component({
+    selector: 'app-pdf-viewer',
+    standalone: true, // Asegúrate de que esto esté si usas Angular standalone
+    imports: [NgxExtendedPdfViewerModule],
+    templateUrl: './pdf-viewer.component.html',
+    styleUrl: './pdf-viewer.component.css'
+  })
+  export class PdfViewerComponent {
     pdfSrc!: string;
     isLoading: boolean = false;
-    errorMsg = false;
+    errorMsg: boolean = false;
+    firstLoad: boolean = true; // Para mostrar el mensaje de bienvenida
+    noResults: boolean = false; // Para manejar cuando el backend devuelve 204
 
+    constructor(private filterService: FilterService) {}
 
-  filterData: any = null;
+    ngOnInit(): void {
+      this.filterService.filterDataLoading$.subscribe(isLoading => {
+        this.isLoading = isLoading;
+      });
 
-  constructor(private filterService: FilterService) {}
-
-  ngOnInit(): void {
-    // Retrieve the shared filter data
-    this.filterService.filterData$.subscribe(
-      data => {
-        if (data && data.url) {
-          // Validate the URL format
-          try {
-            const url = new URL(data.url);
-            if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-              throw new Error('Invalid URL protocol');
-            }
-            this.filterData = data;
-            this.isLoading = true;
-            this.errorMsg = false;
-            setTimeout(() => {
-              // Replace "http://" with "https://" for secure URLs
-              this.pdfSrc = data.url.replace("http://", "https://");
-              this.isLoading = false;
-              console.log('Received filter data:', this.filterData);
-            }, 1000);
-          } catch (error) {
-            console.error('Invalid URL:', error);
+      this.filterService.filterData$.subscribe(
+        (data) => {
+          if (!data) {
+            this.firstLoad = true;
             this.pdfSrc = '';
+            this.errorMsg = false;
+            this.noResults = false;
+          } else if (data.empty) {
+            this.noResults = true;
             this.errorMsg = true;
-            this.isLoading = false;
+            this.firstLoad = false;
+            this.pdfSrc = '';
+          } else if (data.pdf_base64) {
+            this.pdfSrc = `data:application/pdf;base64,${data.pdf_base64}`;
+            this.errorMsg = false;
+            this.noResults = false;
+            this.firstLoad = false;
+          } else {
+            this.errorMsg = true;
+            this.firstLoad = false;
+            this.noResults = false;
+            this.pdfSrc = '';
           }
-        } else {
-          // Handle missing or invalid data
+        },
+        (error) => {
           this.pdfSrc = '';
           this.errorMsg = true;
-          this.isLoading = false;
+          this.firstLoad = false;
+          this.noResults = false;
         }
-      },
-      error => {
-        // Handle subscription errors
-        console.error('Error in filterData subscription:', error);
-        this.pdfSrc = '';
-        this.errorMsg = true;
-        this.isLoading = false;
-      }
-    );
+      );
+    }
+
   }
-}

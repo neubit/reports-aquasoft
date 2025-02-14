@@ -1,17 +1,29 @@
-@if (!isLoading && pdfSrc && !errorMsg) {
-<ngx-extended-pdf-viewer [src]="pdfSrc" useBrowserLocale="true"
-[showOpenFileButton]="false"
-[showTextEditor]="false"
-[showStampEditor]="false"
-[showDrawEditor]="false"
-[showHighlightEditor]="false"></ngx-extended-pdf-viewer>
-} @else if(isLoading) {
-  <div class="loading-spinner">
+@if (firstLoad && !isLoading) {
+  <div class="welcome-message container-msg">
+    <p> ¡Bienvenido! Aquí podrás visualizar tus reportes en PDF cuando los generes.</p>
+  </div>
+} @else if (isLoading) {
+  <div class="container-msg">
     <span class="loader"></span>
     <p>Cargando el reporte, por favor espera...</p>
   </div>
-} @else if(!isLoading && !pdfSrc && errorMsg) {
-  <div class="loading-spinner">
-    <p>Parece que aún no hay un reporte disponible. Por favor, completa el formulario para generarlo y verlo aquí.</p>
+} @else if (noResults) {
+  <div class="no-results-message container-msg">
+    <p> No se encontraron datos para el filtro seleccionado. Intenta con otros criterios.</p>
+  </div>
+} @else if (pdfSrc && !errorMsg) {
+  <ngx-extended-pdf-viewer
+    [src]="pdfSrc"
+    useBrowserLocale="true"
+    [showOpenFileButton]="false"
+    [showTextEditor]="false"
+    [showStampEditor]="false"
+    [showDrawEditor]="false"
+    [showHighlightEditor]="false"
+  >
+  </ngx-extended-pdf-viewer>
+} @else if (errorMsg) {
+  <div class="error-message container-msg">
+    <p>Ocurrió un error al cargar el reporte. Por favor, intenta de nuevo.</p>
   </div>
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -40,8 +40,12 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class FilterFormComponent implements OnInit {
   filterForm!: FormGroup;
-  listOfOption: string[] = ['Opción 1', 'Opción 2', 'Opción 3'];
   listOfSelectedValue = [''];
+
+  listOfReports = [
+    { label: 'Facturación', value: 'facturacion' },
+    { label: 'Verificador de Lectura', value: 'verlectura' }
+  ];
 
   periodos!: Periodo[];
   localidades!: Localidad[];
@@ -51,12 +55,13 @@ export class FilterFormComponent implements OnInit {
   submitted = false;
   isLoading = false;
 
-  typeReport: string = 'facturacion';
+  typeReport: string = '';
   //verlectura
 
 
-  constructor(private fb: FormBuilder, private filterService: FilterService, private route: ActivatedRoute) {
+  constructor(private fb: FormBuilder, private filterService: FilterService) {
     this.filterForm = this.fb.group({
+      report: new FormControl<string>('', Validators.required),
       periodo: new FormControl<string>('', Validators.required),
       localidad: new FormControl<string>('', Validators.required),
       sector: new FormControl<string>('', Validators.required),
@@ -67,15 +72,6 @@ export class FilterFormComponent implements OnInit {
   }
 
   ngOnInit() {
-      // Leer el parámetro desde la URL
-      this.route.queryParams.subscribe(params => {
-        this.typeReport = params['typeReport'] || 'facturacion'; // Si no existe, usa 'facturacion'
-        if(this.typeReport === "verlectura") {
-          const rutaControl = this.filterForm.get('ruta');
-          rutaControl?.setValidators(Validators.required);
-          rutaControl?.updateValueAndValidity();
-        }
-      });
     this.loadFilters();
   }
 
@@ -83,23 +79,20 @@ export class FilterFormComponent implements OnInit {
     forkJoin({
       periodos: this.filterService.getPeriodos().pipe(
         catchError((error) => {
-          console.error('Error al cargar periodos:', error);
           return []; // Handle error by returning an empty array
         })
       ),
       localidades: this.filterService.getLocalidades().pipe(
         catchError((error) => {
-          console.error('Error al cargar localidades:', error);
           return []; // Handle error by returning an empty array
         })
       )
     }).subscribe({
-      next: ({periodos,localidades }) => {
+      next: ({ periodos, localidades }) => {
         this.periodos = periodos;
         this.localidades = localidades;
       },
       error: (err) => {
-        console.error('Error loading filters:', err);
       },
     });
   }
@@ -112,7 +105,6 @@ export class FilterFormComponent implements OnInit {
         .getSectores(localidadRowId)
         .pipe(
           catchError((error) => {
-            console.error('Error al cargar sectores:', error);
             return []; // Handle error by returning an empty array
           })
         )
@@ -128,13 +120,12 @@ export class FilterFormComponent implements OnInit {
 
   onSectorChange(sectorRowId: number): void {
     // Filter sectores based on the selected localidad
-    if (sectorRowId ) {
+    if (sectorRowId) {
       this.filterForm.get('ruta')?.setValue('');
       this.filterService
         .getRutas(sectorRowId)
         .pipe(
           catchError((error) => {
-            console.error('Error al cargar rutas:', error);
             return []; // Handle error by returning an empty array
           })
         )
@@ -148,10 +139,20 @@ export class FilterFormComponent implements OnInit {
     }
   }
 
+  onReportChange(reportType: string): void {
+    this.typeReport = reportType;
+    const sector = this.filterForm.controls['sector'].value
+    if (reportType === 'verlectura' && sector) {
+      this.onSectorChange(sector);
+    }
+  }
+
   applyFilters() {
     this.submitted = true;
     if (this.filterForm.valid) {
       this.isLoading = true;
+      this.filterService.setLoadingState(true);
+
       const f = this.filterForm.value;
 
       let filtros: any = {
@@ -163,39 +164,44 @@ export class FilterFormComponent implements OnInit {
         "SECTOR-NOMBRE": this.sectores.find((s) => s.rowid === f.sector)?.label || ''
       };
 
-            if(this.typeReport === 'facturacion') {
+      if (this.typeReport === 'facturacion') {
 
-                this.filterService.reporteFacturacion(filtros).subscribe(
-                  (response) => {
-                    console.log('Respuesta:', response);
-                    this.filterService.setFilterData(response);
-                    this.isLoading = false;
-                  },
-                  (error) => {
-                    console.error('Error:', error);
-                    this.filterService.resetFilterData();
-                    this.isLoading = false;
-                  }
-                );
-          } else if(this.typeReport === 'verlectura') {
-            filtros = {...filtros, 'RUTAS': this.filterForm.controls['ruta'].value }
-              this.filterService.reporteVerificacionLectura(filtros).subscribe(
-                (response) => {
-                  console.log('Respuesta:', response);
-                  this.filterService.setFilterData(response);
-                  this.isLoading = false;
-                },
-                (error) => {
-                  console.error('Error:', error);
-                  this.filterService.resetFilterData();
-                  this.isLoading = false;
-                }
-              );
+        this.filterService.reporteFacturacion(filtros).subscribe(
+          (response) => {
+            this.filterService.setFilterData(response);
+            this.isLoading = false;
+            this.filterService.setLoadingState(false);
+
+          },
+          (error) => {
+            this.filterService.resetFilterData();
+            this.isLoading = false;
+            this.filterService.setLoadingState(false);
+
           }
+        );
+      } else if (this.typeReport === 'verlectura') {
+        filtros = { ...filtros, 'RUTAS': this.filterForm.controls['ruta'].value }
+        this.filterService.reporteVerificacionLectura(filtros).subscribe(
+          (response) => {
+            this.filterService.setFilterData(response);
+            this.isLoading = false;
+            this.filterService.setLoadingState(false);
+
+          },
+          (error) => {
+            this.filterService.resetFilterData();
+            this.isLoading = false;
+            this.filterService.setLoadingState(false);
+
+          }
+        );
+      }
     } else {
-      console.log('Invalid form');
       this.filterService.resetFilterData();
       this.isLoading = false;
+      this.filterService.setLoadingState(false);
+
     }
   }
 }

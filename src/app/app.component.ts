@@ -18,12 +18,11 @@ import { FilterFormComponent } from './pages/filter-form/filter-form.component';
     NzSegmentedModule,
     PdfViewerComponent,
     FilterFormComponent,
-    
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent {
   isCollapsed = false;
-
+  isLoading = false;
 }
