@@ -43,7 +43,7 @@
           } else {
             this.errorMsg = true;
             this.firstLoad = false;
-            this.noResults = false;
+            this.noResults = true;
             this.pdfSrc = '';
           }
         },
@@ -51,7 +51,7 @@
           this.pdfSrc = '';
           this.errorMsg = true;
           this.firstLoad = false;
-          this.noResults = false;
+          this.noResults = true;
         }
       );
     }

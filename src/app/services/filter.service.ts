@@ -22,7 +22,7 @@ export class FilterService {
   constructor(private http: HttpClient) {}
 
   resetFilterData() {
-    this.filterDataSubject.next(null);
+    this.filterDataSubject.next({empty: true});
   }
 
   setFilterData(data: any) {
@@ -45,8 +45,8 @@ export class FilterService {
     return this.http.post(`${this.apiUrl}/reporte-facturacion`, filtros, { headers, observe: 'response' })
       .pipe(
         map((response: HttpResponse<any>) => {
-          if (response.status === 204) {
-            return { empty: true }; // Indicador de que no hay contenido
+          if (response.status === 204 || response.status === 500) {
+            return { empty: true };
           }
           return response.body;
         })
@@ -61,8 +61,8 @@ export class FilterService {
     return this.http.post(`${this.apiUrl}/reporte-verificadorDeLectura`, filtros, { headers, observe: 'response' })
       .pipe(
         map((response: HttpResponse<any>) => {
-          if (response.status === 204) {
-            return { empty: true }; // Indicador de que no hay contenido
+          if (response.status === 204 || response.status === 500) {
+            return { empty: true };
           }
           return response.body;
         })
