@@ -22,7 +22,7 @@
     <div style="color: red">El campo Reporte es obligatorio.</div>
     }
   </div>
-  @if(typeReport){
+  @if(typeReport === 'duplicado'){
 
   <div nz-col nzSpan="24" nz-flex nzVertical="true">
     <span nz-typography><strong>PERIODO*</strong></span>
@@ -47,7 +47,7 @@
   </div>
 
   <div nz-col nzSpan="24" nz-flex nzVertical="true">
-    <span nz-typography><strong>LOCALIDAD*</strong></span>
+    <span nz-typography><strong>COMUNIDAD*</strong></span>
     <nz-select
       formControlName="localidad"
       nzShowSearch
@@ -65,7 +65,7 @@
     @if(submitted && filterForm.get('localidad')?.invalid &&
     !filterForm.get('localidad')?.touched &&
     filterForm.get('localidad')?.hasError('required')){
-    <div style="color: red">El campo Localidad es obligatorio.</div>
+    <div style="color: red">El campo Comunidad es obligatorio.</div>
     }
   </div>
 
@@ -93,8 +93,6 @@
     }
   </div>
 
-
-    @if(typeReport === 'verlectura') {
       <div nz-col nzSpan="24" nz-flex nzVertical="true">
         <span nz-typography><strong>RUTA</strong></span>
         <nz-select
@@ -116,7 +114,6 @@
           <div style="color: red">El campo Ruta es obligatorio.</div>
           }
       </div>
-    }
 
   <!-- <div nz-col nzSpan="24" nz-flex nzVertical="true">
     <span nz-typography><strong>LEÍDO</strong></span>
@@ -153,6 +150,17 @@
       >{{ selectedList.length }} + Seleccionados</ng-template
     >
   </div> -->
+}
+@if(typeReport === 'duplicadoServ'){
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+  <span nz-typography><strong>NÚMERO SERVICIO*</strong></span>
+  <input nz-input placeholder="Digite el número de servicio" formControlName="numserv" />
+  @if(submitted && filterForm.get('numserv')?.invalid &&
+  !filterForm.get('numserv')?.touched &&
+  filterForm.get('numserv')?.hasError('required')){
+  <div style="color: red">El campo Número Servicio es obligatorio.</div>
+  }
+  </div>
 }
 
   <div nz-flex nzHorizontal="true" nzAlign="center" nzJustify="center">

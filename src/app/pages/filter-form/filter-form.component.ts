@@ -1,4 +1,6 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { catchError, forkJoin } from 'rxjs';
 
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -8,18 +10,10 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzFlexModule } from 'ng-zorro-antd/flex';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
+import { NzInputModule } from 'ng-zorro-antd/input';
+
 import { FilterService } from '../../services/filter.service';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-  FormControl,
-} from '@angular/forms';
-import { catchError, forkJoin } from 'rxjs';
 import { Localidad, Periodo, Ruta, Sector } from '../../models/filters';
-import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-filter-form',
@@ -34,175 +28,172 @@ import { ActivatedRoute } from '@angular/router';
     NzFlexModule,
     NzSegmentedModule,
     NzButtonModule,
+    NzInputModule
   ],
   templateUrl: './filter-form.component.html',
-  styleUrl: './filter-form.component.css',
+  styleUrls: ['./filter-form.component.css'],
 })
 export class FilterFormComponent implements OnInit {
   filterForm!: FormGroup;
-  listOfSelectedValue = [''];
-
   listOfReports = [
-    { label: 'Facturación', value: 'facturacion' },
-    { label: 'Verificador de Lectura', value: 'verlectura' }
+    { label: 'Duplicado', value: 'duplicado' },
+    { label: 'Duplicado Número Servicio', value: 'duplicadoServ' }
   ];
 
-  periodos!: Periodo[];
-  localidades!: Localidad[];
-  sectores!: Sector[];
-  rutas!: Ruta[];
+  periodos: Periodo[] = [];
+  localidades: Localidad[] = [];
+  sectores: Sector[] = [];
+  rutas: Ruta[] = [];
 
   submitted = false;
   isLoading = false;
-
   typeReport: string = '';
-  //verlectura
-
 
   constructor(private fb: FormBuilder, private filterService: FilterService) {
     this.filterForm = this.fb.group({
       report: new FormControl<string>('', Validators.required),
-      periodo: new FormControl<string>('', Validators.required),
-      localidad: new FormControl<string>('', Validators.required),
-      sector: new FormControl<string>('', Validators.required),
+      periodo: new FormControl<string>(''),
+      localidad: new FormControl<string>(''),
+      sector: new FormControl<string>(''),
       ruta: new FormControl<string>(''),
+      numserv: new FormControl<string>(''),
       leido: new FormControl<string>(''),
       facturado: new FormControl<string>(''),
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadFilters();
   }
 
-  loadFilters(): void {
-    forkJoin({
-      periodos: this.filterService.getPeriodos().pipe(
-        catchError((error) => {
-          return []; // Handle error by returning an empty array
-        })
-      ),
-      localidades: this.filterService.getLocalidades().pipe(
-        catchError((error) => {
-          return []; // Handle error by returning an empty array
-        })
-      )
-    }).subscribe({
-      next: ({ periodos, localidades }) => {
-        this.periodos = periodos;
-        this.localidades = localidades;
-      },
-      error: (err) => {
-      },
-    });
-  }
-
   onLocalidadChange(localidadRowId: number): void {
-    // Filter sectores based on the selected localidad
     if (localidadRowId) {
       this.filterForm.get('sector')?.setValue('');
-      this.filterService
-        .getSectores(localidadRowId)
-        .pipe(
-          catchError((error) => {
-            return []; // Handle error by returning an empty array
-          })
-        )
-        .subscribe((sectores: any[]) => {
+      this.filterService.getSectores(localidadRowId)
+        .pipe(catchError(() => []))
+        .subscribe((sectores: Sector[]) => {
           this.sectores = sectores;
-          this.filterForm.get('sector')?.enable(); // Enable the sector dropdown
+          this.filterForm.get('sector')?.enable();
         });
     } else {
       this.sectores = [];
-      this.filterForm.get('sector')?.disable(); // Disable the sector dropdown
+      this.filterForm.get('sector')?.disable();
     }
   }
 
   onSectorChange(sectorRowId: number): void {
-    // Filter sectores based on the selected localidad
     if (sectorRowId) {
       this.filterForm.get('ruta')?.setValue('');
-      this.filterService
-        .getRutas(sectorRowId)
-        .pipe(
-          catchError((error) => {
-            return []; // Handle error by returning an empty array
-          })
-        )
-        .subscribe((rutas: any[]) => {
+      this.filterService.getRutas(sectorRowId)
+        .pipe(catchError(() => []))
+        .subscribe((rutas: Ruta[]) => {
           this.rutas = rutas;
-          this.filterForm.get('ruta')?.enable(); // Enable the sector dropdown
+          this.filterForm.get('ruta')?.enable();
         });
     } else {
-      this.sectores = [];
-      this.filterForm.get('sector')?.disable(); // Disable the sector dropdown
+      this.rutas = [];
+      this.filterForm.get('ruta')?.disable();
     }
   }
 
   onReportChange(reportType: string): void {
     this.typeReport = reportType;
-    const sector = this.filterForm.controls['sector'].value
-    if (reportType === 'verlectura' && sector) {
-      this.onSectorChange(sector);
+    this.resetValidators();
+
+    if (reportType === 'duplicadoServ') {
+      this.filterForm.controls['numserv'].setValidators([Validators.required]);
+    } else if (reportType === 'duplicado') {
+      this.filterForm.controls['periodo'].setValidators([Validators.required]);
+      this.filterForm.controls['localidad'].setValidators([Validators.required]);
+      this.filterForm.controls['sector'].setValidators([Validators.required]);
+      this.filterForm.controls['ruta'].setValidators([Validators.required]);
     }
+
+    this.updateFormValidity();
   }
 
-  applyFilters() {
+  applyFilters(): void {
     this.submitted = true;
     if (this.filterForm.valid) {
       this.isLoading = true;
       this.filterService.setLoadingState(true);
 
-      const f = this.filterForm.value;
+      const formValue = this.filterForm.value;
 
-      let filtros: any = {
-        "PERIODO-ID": f.periodo,
-        "PERIODO-NOMBRE": this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-        "LOCALIDAD-ID": f.localidad,
-        "LOCALIDAD-NOMBRE": this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
-        "SECTOR-ID": f.sector,
-        "SECTOR-NOMBRE": this.sectores.find((s) => s.rowid === f.sector)?.label || ''
-      };
-
-      if (this.typeReport === 'facturacion') {
-
-        this.filterService.reporteFacturacion(filtros).subscribe(
-          (response) => {
-            this.filterService.setFilterData(response);
-            this.isLoading = false;
-            this.filterService.setLoadingState(false);
-
-          },
-          (error) => {
-            this.filterService.resetFilterData();
-            this.isLoading = false;
-            this.filterService.setLoadingState(false);
-
-          }
-        );
-      } else if (this.typeReport === 'verlectura') {
-        filtros = { ...filtros, 'RUTAS': this.filterForm.controls['ruta'].value }
-        this.filterService.reporteVerificacionLectura(filtros).subscribe(
-          (response) => {
-            this.filterService.setFilterData(response);
-            this.isLoading = false;
-            this.filterService.setLoadingState(false);
-
-          },
-          (error) => {
-            this.filterService.resetFilterData();
-            this.isLoading = false;
-            this.filterService.setLoadingState(false);
-
-          }
-        );
+      if (this.typeReport === 'duplicado') {
+        this.handleDuplicadoReport(formValue);
+      } else if (this.typeReport === 'duplicadoServ') {
+        this.handleDuplicadoServReport(formValue.numserv);
       }
     } else {
-      this.filterService.resetFilterData();
-      this.isLoading = false;
-      this.filterService.setLoadingState(false);
-
+      this.resetFilterData();
     }
   }
-}
 
+  private handleDuplicadoReport(formValue: any): void {
+    const filtros = {
+      "PERIODO-ID": formValue.periodo,
+      "PERIODO-NOMBRE": this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+      "LOCALIDAD-ID": formValue.localidad,
+      "LOCALIDAD-NOMBRE": this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
+      "SECTOR-ID": formValue.sector,
+      "SECTOR-NOMBRE": this.sectores.find((s) => s.rowid === formValue.sector)?.label || '',
+      'RUTAS': formValue.ruta
+    };
+
+    this.filterService.reporteFacturacion(filtros).subscribe({
+      next: (response) => this.handleSuccess(response),
+      error: () => this.handleError(),
+    });
+  }
+
+  private handleDuplicadoServReport(numServ: string): void {
+    this.filterService.reporteVerificacionLectura(numServ).subscribe({
+      next: (response) => this.handleSuccess(response),
+      error: () => this.handleError(),
+    });
+  }
+
+  private handleSuccess(response: any): void {
+    this.filterService.setFilterData(response);
+    this.isLoading = false;
+    this.filterService.setLoadingState(false);
+  }
+
+  private handleError(): void {
+    this.resetFilterData();
+    this.isLoading = false;
+    this.filterService.setLoadingState(false);
+  }
+
+  private resetFilterData(): void {
+    this.filterService.resetFilterData();
+    this.isLoading = false;
+    this.filterService.setLoadingState(false);
+  }
+
+  private resetValidators(): void {
+    Object.keys(this.filterForm.controls).forEach(key => {
+      this.filterForm.get(key)?.clearValidators();
+    });
+  }
+
+  private updateFormValidity(): void {
+    Object.keys(this.filterForm.controls).forEach(key => {
+      this.filterForm.get(key)?.updateValueAndValidity();
+    });
+  }
+
+  private loadFilters(): void {
+    forkJoin({
+      periodos: this.filterService.getPeriodos().pipe(catchError(() => [])),
+      localidades: this.filterService.getLocalidades().pipe(catchError(() => []))
+    }).subscribe({
+      next: ({ periodos, localidades }) => {
+        this.periodos = periodos;
+        this.localidades = localidades;
+      },
+      error: () => {},
+    });
+  }
+}
