@@ -40,7 +40,7 @@ export const listOfReports = [
   //   endpoint: 'reporte_duplicado_lectura',
   // },
   { label: 'Resumen de Facturación', value: 'resumenFacturacion', endpoint: 'reporte_facturacion_resumen' },
-  { label: 'Facturación', value: 'facturacion', endpoint: 'facturacion' },
+  { label: 'Facturación', value: 'facturacion', endpoint: 'reporte_facturacion' },
   {
     label: 'Verificador de Lectura',
     value: 'verLectura',

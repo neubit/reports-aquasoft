@@ -179,18 +179,18 @@
 
   <!-- Date Range Fields (Conditional) -->
   @if(shouldShowDateRangeFields()) {
-    <!-- <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>ENTIDAD*</strong></span>
-      <nz-select formControlName="gerencia" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
-        (ngModelChange)="onGerenciaChange($event)">
-        @for (item of gerencias; track item) {
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography><strong>LOCALIDAD*</strong></span>
+      <nz-select formControlName="localidad" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
+        (ngModelChange)="onLocalidadChange($event)">
+        @for (item of localidades; track item) {
           <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
         }
       </nz-select>
-      @if(showError('gerencia')) {
-        <div style="color: red">El campo Entidad es obligatorio.</div>
+      @if(showError('localidad')) {
+        <div style="color: red">El campo Localidad es obligatorio.</div>
       }
-    </div> -->
+    </div>
 
     <div nz-col nzSpan="24" nz-flex nzVertical="true">
       <span nz-typography><strong>FECHA INICIO*</strong></span>

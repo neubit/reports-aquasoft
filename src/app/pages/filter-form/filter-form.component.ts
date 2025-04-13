@@ -77,6 +77,7 @@ export class FilterFormComponent implements OnInit {
   noAdeudoSuccess = false;
   noServiciosSuccess = false;
   facturacionSuccess = false;
+  resumenFacturacionSuccess = false;
 
   private requiredFields = REQUIRED_FIELDS;
 
@@ -244,54 +245,39 @@ export class FilterFormComponent implements OnInit {
   private handleDuplicadoReport(formValue: any): void {
     let filtros: any = {};
 
-    if (
-      this.typeReport === 'anexo13Convenios' ||
-      this.typeReport === 'cortesReconexion' ||
-      this.typeReport === 'noServicios' ||
-      this.typeReport === 'noAdeudo' ||
-      this.typeReport === 'instalaciones'
-    ) {
+   if (this.typeReport === 'verLectura') {
       filtros = {
-        SUCURSAL: formValue.gerencia,
-        'FECHA-INI': this.formatDate(formValue.startDate),
-        'FECHA-FIN': this.formatDate(formValue.endDate),
+        'PERIODO-ID': formValue.periodo,
+        'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'LOCALIDAD-ID': formValue.localidades, // Takes first selected
+        'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
+        'SECTOR-ID': formValue.sector,
+        'SECTOR-NOMBRE': this.sectores.find((s) => s.code === formValue.sector)?.label || '',
+        'RUTAS': formValue.rutas
       };
     } else if (this.typeReport === 'facturacion') {
       filtros = {
-        PERIODO_ID: formValue.periodo,
-        PERIODO:
-          this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
-        SUCURSAL_ID: formValue.gerencia,
-        SUCURSAL:
-          this.gerencias.find((g) => g.rowid === formValue.gerencia)?.label ||
-          '',
-        SECTOR_ID: formValue.sector,
-        SECTOR:
-          this.sectores.find((s) => s.rowid === formValue.sector)?.label || '',
-        CONTRATO_ID: formValue.tipoContrato,
-        CONTRATO:
-          this.contratos.find((c) => c.rowid === formValue.tipoContrato)
-            ?.label || '',
-        TARIFA_ID: formValue.tipoTarifa,
-        TARIFA:
-          this.tarifas.find((t) => t.rowid === formValue.tipoTarifa)?.label ||
-          '',
+        'PERIODO-ID': formValue.periodo,
+        'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'LOCALIDAD-ID': formValue.localidad,
+        'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
+        'SECTOR-ID': formValue.sector,
+        'SECTOR-NOMBRE': this.sectores.find((s) => s.code === formValue.sector)?.label || '',
       };
-    } else if (this.typeReport === 'duplicadoServ') {
-      filtros = {
-        "PERIODO-ID": formValue.periodo,
-        "CONTRATO-ID": formValue.numserv
-      }
-    } else {
+    } else if (this.typeReport === 'resumenFacturacion') {
       filtros = {
         'PERIODO-ID': formValue.periodo,
-        'TIPO-MEDICION-ID': '',
-        'TIPO-CONTRATO': '',
-        'GERENCIA-ID': formValue.gerencia,
-        'SISTEMA-ID': formValue.sistema,
-        'SECTOR-ID': formValue.sector,
-        'CONTRATO-ID': formValue.numserv,
+        'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'LOCALIDAD-ID': formValue.localidades?.join(','),
+        'SECTOR-ID': formValue.sectores?.join(',')
       };
+    } else if (this.typeReport === 'noAdeudo') {
+      filtros = {
+        'SUCURSAL': formValue.localidad,
+        'FECHA-INI': this.formatDate(formValue.startDate),
+        'FECHA-FIN': this.formatDate(formValue.endDate)
+      };
+      
     }
 
     const reportApi = this.listOfReports.find(
@@ -395,26 +381,20 @@ export class FilterFormComponent implements OnInit {
 
   private handleSuccess(response: any): void {
     if (!response.empty) {
-      if (this.typeReport === 'contratosNuevos') {
-        this.contratosNuevosSuccess = true;
-      }
-      if (this.typeReport === 'anexo13Convenios') {
-        this.anexo13Success = true;
-      }
-      if (this.typeReport === 'cortesReconexion') {
-        this.cortesReconexionSuccess = true;
-      }
-      if (this.typeReport === 'instalaciones') {
-        this.instalacionesSuccess = true;
-      }
-      if (this.typeReport === 'noAdeudo') {
-        this.noAdeudoSuccess = true;
-      }
-      if (this.typeReport === 'noServicios') {
-        this.noServiciosSuccess = true;
-      }
-      if (this.typeReport === 'facturacion') {
-        this.facturacionSuccess = true;
+      const successMap: Record<string, keyof FilterFormComponent> = {
+        contratosNuevos: 'contratosNuevosSuccess',
+        anexo13Convenios: 'anexo13Success',
+        cortesReconexion: 'cortesReconexionSuccess',
+        instalaciones: 'instalacionesSuccess',
+        noAdeudo: 'noAdeudoSuccess',
+        noServicios: 'noServiciosSuccess',
+        facturacion: 'facturacionSuccess',
+        resumenFacturacin: 'resumenFacturacionSuccess',
+      };
+    
+      const successKey = successMap[this.typeReport];
+      if (successKey) {
+        (this[successKey as keyof FilterFormComponent] as boolean) = true;
       }
     }
     this.filterService.setFilterData(response);
@@ -464,27 +444,6 @@ export class FilterFormComponent implements OnInit {
     this.filterForm.updateValueAndValidity(); // Ensure validation is triggered on change
   }
 
-  private dateRangeValidator(
-    group: FormGroup
-  ): { [key: string]: boolean } | null {
-    const startDate = group.get('startDate')?.value;
-    const endDate = group.get('endDate')?.value;
-    if (startDate && endDate && startDate >= endDate) {
-      return { dateRangeInvalid: true };
-    }
-    return null;
-  }
-
-  private formatDate(dateString: string): string {
-    if (!dateString) {
-      return ''; // Return an empty string if the date is not valid
-    }
-    const formattedDate = this.datePipe.transform(dateString, 'yyyy-MM-dd');
-    return formattedDate || ''; // Use Angular's DatePipe to format the date
-  }
-
-  // In your component class:
-
 showError(controlName: string): boolean {
   const control = this.filterForm.get(controlName);
   return !!(
@@ -498,8 +457,8 @@ showError(controlName: string): boolean {
 shouldShowPeriodField(): boolean {
   return !!(
     this.typeReport &&
-    !['anexo13Convenios', 'cortesReconexion', 'noServicios', 'instalaciones'].includes(this.typeReport) &&
-    ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura', 'noAdeudo', 'resumenFacturacion'].includes(this.typeReport)
+    !['anexo13Convenios', 'cortesReconexion', 'noServicios', 'instalaciones', 'noAdeudo'].includes(this.typeReport) &&
+    ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura', 'resumenFacturacion'].includes(this.typeReport)
   );
 }
 
@@ -527,7 +486,8 @@ shouldShowDownloadButton(): boolean {
     'instalaciones': this.instalacionesSuccess,
     'noAdeudo': this.noAdeudoSuccess,
     'noServicios': this.noServiciosSuccess,
-    'facturacion': this.facturacionSuccess
+    'facturacion': this.facturacionSuccess,
+    'resumenFacturacion': this.resumenFacturacionSuccess
   };
 
   return !!successMap[this.typeReport as keyof typeof successMap];
@@ -567,6 +527,26 @@ private resetExcelsFlags() {
   this.noAdeudoSuccess = false;
   this.noServiciosSuccess = false;
   this.facturacionSuccess = false;
+  this.resumenFacturacionSuccess = false;
+}
+
+private dateRangeValidator(
+  group: FormGroup
+): { [key: string]: boolean } | null {
+  const startDate = group.get('startDate')?.value;
+  const endDate = group.get('endDate')?.value;
+  if (startDate && endDate && startDate >= endDate) {
+    return { dateRangeInvalid: true };
+  }
+  return null;
+}
+
+private formatDate(dateString: string): string {
+  if (!dateString) {
+    return ''; // Return an empty string if the date is not valid
+  }
+  const formattedDate = this.datePipe.transform(dateString, 'yyyy-MM-dd');
+  return formattedDate || ''; // Use Angular's DatePipe to format the date
 }
 
 }
