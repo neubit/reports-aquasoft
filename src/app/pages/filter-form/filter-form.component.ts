@@ -8,7 +8,7 @@ import {
   FormControl,
   AbstractControl,
 } from '@angular/forms';
-import { catchError, forkJoin } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, forkJoin, pipe, timeout } from 'rxjs';
 
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -29,7 +29,6 @@ import {
   Periodo,
   Ruta,
   Sector,
-  Sistema,
   Tarifa,
 } from '../../models/filters';
 import { DatePipe } from '@angular/common';
@@ -62,7 +61,6 @@ export class FilterFormComponent implements OnInit {
 
   periodos: Periodo[] = [];
   gerencias: Gerencia[] = [];
-  sistemas: Sistema[] = [];
   localidades: Localidad[] = [];
   sectores: Sector[] = [];
   rutas: Ruta[] = [];
@@ -92,75 +90,72 @@ export class FilterFormComponent implements OnInit {
         report: new FormControl<string>('', Validators.required),
         periodo: new FormControl<string>(''),
         localidad: new FormControl<string>(''),
-        sistema: new FormControl<string>(''),
+        rutas: new FormControl<string>(''),
         sector: new FormControl<string>(''),
         numserv: new FormControl<string>(''),
         startDate: new FormControl(''),
         endDate: new FormControl(''),
         tipoContrato: new FormControl(''),
         tipoTarifa: new FormControl(''),
+        localidades: new FormControl<Array<string>>([]),
+        sectores: new FormControl<Array<string>>([]),
       },
       { validators: this.dateRangeValidator }
     );
+
+    this.filterForm.get('localidades')?.valueChanges
+    .pipe(
+      debounceTime(500),
+      distinctUntilChanged() // Opcional: solo emite si el valor cambió
+    )
+    .subscribe((selectedValues: any) => {
+      if (selectedValues !== null) {
+        console.log('Selected localidades:', selectedValues);
+        this.onLocalidadChange(selectedValues);
+      }
+    });
   }
 
   ngOnInit(): void {
     this.loadFilters();
   }
 
-  // onGerenciaChange(gerenciaRowId: number): void {
-  //   if (gerenciaRowId) {
-  //     this.filterForm.get('sistema')?.setValue('');
-  //     this.filterService
-  //       .getSistemas(gerenciaRowId)
-  //       .pipe(catchError(() => []))
-  //       .subscribe((sistemas: Sistema[]) => {
-  //         this.sistemas = sistemas;
-  //         this.filterForm.get('sistema')?.enable();
-  //       });
-  //   } else {
-  //     this.sistemas = [];
-  //     this.filterForm.get('sistema')?.disable();
-  //   }
-  // }
 
-  // onSistemaChange(sistemaRowId: number): void {
-  //   if (sistemaRowId) {
-  //     this.filterForm.get('sector')?.setValue('');
-  //     this.filterService
-  //       .getSectores(sistemaRowId)
-  //       .pipe(catchError(() => []))
-  //       .subscribe((sectores: Sector[]) => {
-  //         this.sectores = sectores;
-  //         this.filterForm.get('sector')?.enable();
-  //       });
-  //   } else {
-  //     this.sectores = [];
-  //     this.filterForm.get('sistema')?.disable();
-  //   }
-  // }
 
-  onLocalidadChange(sistemaRowId: number): void {
-    if (sistemaRowId) {
-      this.filterForm.get('sector')?.setValue('');
-      this.filterService
-        .getSectores(sistemaRowId)
-        .pipe(catchError(() => []))
-        .subscribe((sectores: Sector[]) => {
-          this.sectores = sectores;
-          this.filterForm.get('sector')?.enable();
-        });
-    } else {
+  onLocalidadChange(sistemaRowId: any): void {
+    let sistemaRowIdStr: string = '';
+  
+    if (Array.isArray(sistemaRowId)) {
+      sistemaRowIdStr = sistemaRowId.join(',');
+    } else if (sistemaRowId !== null && sistemaRowId !== undefined && sistemaRowId !== '') {
+      sistemaRowIdStr = sistemaRowId.toString();
+    }
+      if (!sistemaRowIdStr) {
       this.sectores = [];
       this.filterForm.get('sector')?.disable();
+      this.filterForm.get('sectores')?.disable();
+
+      return;
     }
+  
+    this.filterForm.get('sector')?.setValue('');
+    this.filterForm.get('sectores')?.setValue([]);
+
+    this.filterService
+      .getSectores(sistemaRowIdStr)
+      .pipe(catchError(() => []))
+      .subscribe((sectores: Sector[]) => {
+        this.sectores = sectores;
+        this.filterForm.get('sector')?.enable();
+        this.filterForm.get('sectores')?.enable();
+      });
   }
 
   onSectorChange(sectorRowId: number): void {
     if (sectorRowId) {
       this.filterForm.get('rutas')?.setValue('');
       this.filterService
-        .getRutas(sectorRowId)
+        .getRutas(this.filterForm.value.localidad, sectorRowId)
         .pipe(catchError(() => []))
         .subscribe((rutas: Ruta[]) => {
           this.rutas = rutas;
@@ -212,7 +207,12 @@ export class FilterFormComponent implements OnInit {
     const resetValues = Object.keys(this.filterForm.controls)
       .filter(controlName => controlName !== 'report')
       .reduce((acc, controlName) => {
+        if(controlName === 'localidades' || controlName === 'sectores') {
+          acc[controlName] = [];
+        } else {
         acc[controlName] = '';
+        }
+        
         return acc;
       }, {} as any);
 
@@ -498,8 +498,8 @@ showError(controlName: string): boolean {
 shouldShowPeriodField(): boolean {
   return !!(
     this.typeReport &&
-    !['anexo13Convenios', 'cortesReconexion', 'noServicios', 'noAdeudo', 'instalaciones'].includes(this.typeReport) &&
-    ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura'].includes(this.typeReport)
+    !['anexo13Convenios', 'cortesReconexion', 'noServicios', 'instalaciones'].includes(this.typeReport) &&
+    ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura', 'noAdeudo', 'resumenFacturacion'].includes(this.typeReport)
   );
 }
 
@@ -549,6 +549,16 @@ getDownloadFunction(): () => void {
   return downloadMap[this.typeReport] || (() => {});
 }
 
+getSelectedCount(selectedList: any): number {
+  if (!selectedList) return 0;
+  return Array.isArray(selectedList) ? selectedList.length : 0;
+}
+
+getSelectedSectoresCount(selectedList: any): number {
+  if (!selectedList) return 0;
+  return Array.isArray(selectedList) ? selectedList.length : 0;
+}
+
 private resetExcelsFlags() {
   this.contratosNuevosSuccess = false;
   this.anexo13Success = false;
@@ -558,4 +568,5 @@ private resetExcelsFlags() {
   this.noServiciosSuccess = false;
   this.facturacionSuccess = false;
 }
+
 }

@@ -55,7 +55,7 @@
         }
       </nz-select>
     </div> -->
-
+    @if(typeReport !== 'resumenFacturacion') {
     <div nz-col nzSpan="24" nz-flex nzVertical="true">
       <span nz-typography><strong>LOCALIDAD*</strong></span>
       <nz-select formControlName="localidad" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
@@ -64,6 +64,9 @@
           <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
         }
       </nz-select>
+      @if(showError('localidad')) {
+        <div style="color: red">El campo Localidad es obligatorio.</div>
+      }
     </div>
 
     <div nz-col nzSpan="24" nz-flex nzVertical="true">
@@ -76,11 +79,65 @@
           <nz-option [nzLabel]="item.label" [nzValue]="item.code"></nz-option>
         }
       </nz-select>
+      @if(showError('sector')) {
+        <div style="color: red">El campo Sector es obligatorio.</div>
+      }
     </div>
+  }
+  @if(typeReport === 'resumenFacturacion') {
+ <!-- Localidades Select -->
+<div nz-col nzSpan="24" nz-flex nzVertical="true">
+  <span nz-typography><strong>LOCALIDAD/ES*</strong></span>
+  <nz-select
+    formControlName="localidades"
+    [nzMaxTagCount]="3"
+    [nzMaxTagPlaceholder]="tagPlaceHolderLocalidades"
+    nzMode="multiple"
+    nzShowSearch
+    nzAllowClear
+    nzPlaceHolder="Selecciona..."
+  >
+    @for (item of localidades; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+    }
+  </nz-select>
+<ng-template #tagPlaceHolderLocalidades let-selectedList>
+  y {{ getSelectedCount(selectedList) }} más seleccionados
+</ng-template>
+  @if (showError('localidades')) {
+    <div style="color: red">El campo localidades es obligatorio.</div>
+  }
+</div>
 
-    <!-- @if(typeReport === 'verLectura') {
+<!-- Sectores Select -->
+<div nz-col nzSpan="24" nz-flex nzVertical="true">
+  <span nz-typography><strong>SECTOR/ES*</strong></span>
+  <nz-select
+    formControlName="sectores"
+    [nzMaxTagCount]="3"
+    [nzMaxTagPlaceholder]="tagPlaceHolderSectores"
+    [nzDisabled]="!filterForm.get('localidades')?.value?.length"
+    nzMode="multiple"
+    nzShowSearch
+    nzAllowClear
+    nzPlaceHolder="Selecciona..."
+  >
+    @for (item of sectores; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.code"></nz-option>
+    }
+  </nz-select>
+<ng-template #tagPlaceHolderSectores let-selectedList>
+  y {{ getSelectedSectoresCount(selectedList) }} más seleccionados
+</ng-template>
+  @if (showError('sectores')) {
+    <div style="color: red">El campo sectores es obligatorio.</div>
+  }
+</div>
+  }
+
+    @if(typeReport === 'verLectura') {
       <div nz-col nzSpan="24" nz-flex nzVertical="true">
-        <span nz-typography><strong>Ruta*</strong></span>
+        <span nz-typography><strong>RUTA*</strong></span>
         <nz-select formControlName="rutas" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
           [nzDisabled]="filterForm.get('sector')?.value">
           @for (item of rutas; track item) {
@@ -88,7 +145,7 @@
           }
         </nz-select>
       </div>
-    } -->
+    }
 
     <!-- <div nz-col nzSpan="24" nz-flex nzVertical="true">
       <span nz-typography><strong>TIPO CONTRATO</strong></span>

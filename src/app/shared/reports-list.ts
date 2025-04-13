@@ -39,12 +39,13 @@ export const listOfReports = [
   //   value: 'duplicadoLectura',
   //   endpoint: 'reporte_duplicado_lectura',
   // },
+  { label: 'Resumen de Facturación', value: 'resumenFacturacion', endpoint: 'reporte_facturacion_resumen' },
+  { label: 'Facturación', value: 'facturacion', endpoint: 'facturacion' },
   {
     label: 'Verificador de Lectura',
     value: 'verLectura',
     endpoint: 'reporte_verificador_de_lectura',
   },
-  { label: 'Facturación', value: 'facturacion', endpoint: 'facturacion' }
   // {
   //   label: 'Instalaciones',
   //   value: 'instalaciones',

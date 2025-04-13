@@ -375,7 +375,7 @@ export class FilterService {
    * Obtiene la lista de sistemas desde el servidor.
    * @returns Observable con un arreglo de sistemas.
    */
-  getSectores(sistema: number): Observable<Sector[]> {
+  getSectores(sistema: string): Observable<Sector[]> {
     return this.http.get<Sector[]>(`${this.apiUrl}/sector/${sistema}`).pipe(
       catchError((error) => {
         return throwError(() => new Error('Error al obtener sectores.'));
@@ -386,8 +386,8 @@ export class FilterService {
    * Obtiene la lista de rutas desde el servidor.
    * @returns Observable con un arreglo de rutas.
    */
-  getRutas(sector: number): Observable<Ruta[]> {
-    return this.http.get<Ruta[]>(`${this.apiUrl}/rutas/${sector}`).pipe(
+  getRutas(localidad: number, sector: number): Observable<Ruta[]> {
+    return this.http.get<Ruta[]>(`${this.apiUrl}/rutas/${localidad}/${sector}`).pipe(
       catchError((error) => {
         return throwError(() => new Error('Error al obtener rutas.'));
       })
