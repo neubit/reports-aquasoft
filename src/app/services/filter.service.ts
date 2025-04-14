@@ -364,7 +364,7 @@ export class FilterService {
     });
 
     this.http
-      .post(`${this.apiUrl}/excel_facturacion_resumen`, filtros, {
+      .post(`${this.apiUrl}/excel_verificador_de_lectura`, filtros, {
         headers,
         responseType: 'blob',
       })
