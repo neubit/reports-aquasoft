@@ -78,6 +78,7 @@ export class FilterFormComponent implements OnInit {
   noServiciosSuccess = false;
   facturacionSuccess = false;
   resumenFacturacionSuccess = false;
+  verLecturaSuccess = false;
 
   private requiredFields = REQUIRED_FIELDS;
 
@@ -249,7 +250,7 @@ export class FilterFormComponent implements OnInit {
       filtros = {
         'PERIODO-ID': formValue.periodo,
         'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
-        'LOCALIDAD-ID': formValue.localidades, // Takes first selected
+        'LOCALIDAD-ID': formValue.localidad, // Takes first selected
         'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
         'SECTOR-ID': formValue.sector,
         'SECTOR-NOMBRE': this.sectores.find((s) => s.code === formValue.sector)?.label || '',
@@ -379,6 +380,35 @@ export class FilterFormComponent implements OnInit {
     this.filterService.downloadExcelFacturacion(filtros);
   }
 
+  downloadExcelResumenFacturacion() {
+    const f = this.filterForm.value;
+
+    const filtros = {
+      'PERIODO-ID': f.periodo,
+      'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'LOCALIDAD-ID': f.localidades,
+      'SECTOR-ID': f.sectores
+    };
+
+    this.filterService.downloadExcelResumenFacturacion(filtros);
+  }
+
+  downloadExcelVerLectura() { 
+    const f = this.filterForm.value;
+
+    const filtros = {
+      'PERIODO-ID': f.periodo,
+      'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'LOCALIDAD-ID': f.localidad,
+      'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
+      'SECTOR-ID': f.sector,
+      'SECTOR-NOMBRE': this.sectores.find((s) => s.code === f.sector)?.label || '',
+      'RUTAS': f.rutas
+    };
+
+    this.filterService.downloadExcelVerLectura(filtros);
+  }
+
   private handleSuccess(response: any): void {
     if (!response.empty) {
       const successMap: Record<string, keyof FilterFormComponent> = {
@@ -389,7 +419,8 @@ export class FilterFormComponent implements OnInit {
         noAdeudo: 'noAdeudoSuccess',
         noServicios: 'noServiciosSuccess',
         facturacion: 'facturacionSuccess',
-        resumenFacturacin: 'resumenFacturacionSuccess',
+        resumenFacturacion: 'resumenFacturacionSuccess',
+        verLectura: 'verLecturaSuccess',
       };
     
       const successKey = successMap[this.typeReport];
@@ -487,7 +518,8 @@ shouldShowDownloadButton(): boolean {
     'noAdeudo': this.noAdeudoSuccess,
     'noServicios': this.noServiciosSuccess,
     'facturacion': this.facturacionSuccess,
-    'resumenFacturacion': this.resumenFacturacionSuccess
+    'resumenFacturacion': this.resumenFacturacionSuccess,
+    'verLectura': this.verLecturaSuccess
   };
 
   return !!successMap[this.typeReport as keyof typeof successMap];
@@ -503,7 +535,9 @@ getDownloadFunction(): () => void {
     'instalaciones': this.downloadExcelInstalaciones.bind(this),
     'noAdeudo': this.downloadExcelNoAdeudo.bind(this),
     'noServicios': this.downloadExcelNoServicios.bind(this),
-    'facturacion': this.downloadExcelFacturacion.bind(this)
+    'facturacion': this.downloadExcelFacturacion.bind(this),
+    'resumenFacturacion': this.downloadExcelResumenFacturacion.bind(this),
+    'verLectura': this.downloadExcelVerLectura.bind(this),
   };
 
   return downloadMap[this.typeReport] || (() => {});
@@ -528,6 +562,7 @@ private resetExcelsFlags() {
   this.noServiciosSuccess = false;
   this.facturacionSuccess = false;
   this.resumenFacturacionSuccess = false;
+  this.verLecturaSuccess = false;
 }
 
 private dateRangeValidator(

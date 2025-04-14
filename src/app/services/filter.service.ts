@@ -323,6 +323,72 @@ export class FilterService {
       });
   }
 
+  downloadExcelResumenFacturacion(
+    filtros: any
+  ): void {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    this.http
+      .post(`${this.apiUrl}/excel_facturacion_resumen`, filtros, {
+        headers,
+        responseType: 'blob',
+      })
+      .subscribe({
+        next: (response: Blob) => {
+          const blob = new Blob([response], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Resumen Facturacion ${filtros.PERIODO}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: (error) => {
+          console.error('Error al descargar el archivo:', error);
+          alert('Hubo un error al descargar el archivo.');
+        },
+      });
+  }
+
+  downloadExcelVerLectura(
+    filtros: any
+  ): void {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    this.http
+      .post(`${this.apiUrl}/excel_facturacion_resumen`, filtros, {
+        headers,
+        responseType: 'blob',
+      })
+      .subscribe({
+        next: (response: Blob) => {
+          const blob = new Blob([response], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Verificacion Lectura ${filtros.PERIODO}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: (error) => {
+          console.error('Error al descargar el archivo:', error);
+          alert('Hubo un error al descargar el archivo.');
+        },
+      });
+  }
+
   /**
    * Obtiene la lista de periodos desde el servidor.
    * @returns Observable con un arreglo de periodos.
