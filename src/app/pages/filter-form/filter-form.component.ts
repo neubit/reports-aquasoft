@@ -384,10 +384,10 @@ export class FilterFormComponent implements OnInit {
     const f = this.filterForm.value;
 
     const filtros = {
-      'PERIODO-ID': f.periodo,
-      'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-      'LOCALIDAD-ID': f.localidades,
-      'SECTOR-ID': f.sectores
+      'PERIODO_ID': f.periodo,
+      'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'LOCALIDAD_ID': f.localidades.join(','),
+      'SECTOR_ID': f.sectores.join(',')
     };
 
     this.filterService.downloadExcelResumenFacturacion(filtros);
@@ -397,11 +397,11 @@ export class FilterFormComponent implements OnInit {
     const f = this.filterForm.value;
 
     const filtros = {
-      'PERIODO-ID': f.periodo,
-      'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-      'LOCALIDAD-ID': f.localidad,
-      'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
-      'SECTOR-ID': f.sector,
+      'PERIODO_ID': f.periodo,
+      'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'LOCALIDAD_ID': f.localidad,
+      'LOCALIDAD_NOMBRE':  this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
+      'SECTOR_ID': f.sector,
       'SECTOR-NOMBRE': this.sectores.find((s) => s.code === f.sector)?.label || '',
       'RUTAS': f.rutas
     };
