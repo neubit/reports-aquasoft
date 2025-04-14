@@ -402,7 +402,7 @@ export class FilterFormComponent implements OnInit {
       'LOCALIDAD_ID': f.localidad,
       'LOCALIDAD_NOMBRE':  this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
       'SECTOR_ID': f.sector,
-      'SECTOR-NOMBRE': this.sectores.find((s) => s.code === f.sector)?.label || '',
+      'SECTOR_NOMBRE': this.sectores.find((s) => s.code === f.sector)?.label || '',
       'RUTAS': f.rutas
     };
 
