@@ -10,7 +10,9 @@ import { Filter, Sector } from '../models/filters';
 export class FilterService {
 
   private apiUrl = 'https://reporteador.japama.net/api';
+  
 
+  // 'https://reporteador.japama.net/api';
   //https://reporteador.japama.net/api/generar-reporte
 
   private filterDataSubject = new BehaviorSubject<any>(null);
@@ -207,7 +209,7 @@ export class FilterService {
   }
 
   downloadExcelNoAdeudo(
-    entidad: number,
+    localidad: number,
     startDate: string,
     endDate: string
   ): void {
@@ -216,7 +218,7 @@ export class FilterService {
     });
 
     const filtros = {
-      SUCURSAL: entidad,
+      'SUCURSAL': localidad,
       'FECHA-INI': startDate,
       'FECHA-FIN': endDate,
     };
@@ -289,7 +291,6 @@ export class FilterService {
   }
 
   downloadExcelFacturacion(
-    entidad: number,
     filtros: any
   ): void {
     const headers = new HttpHeaders({

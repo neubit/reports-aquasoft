@@ -343,7 +343,7 @@ export class FilterFormComponent implements OnInit {
     const f = this.filterForm.value;
 
     this.filterService.downloadExcelNoAdeudo(
-      f.gerencia,
+      f.localidad,
       this.formatDate(f.startDate),
       this.formatDate(f.endDate)
     );
@@ -365,18 +365,18 @@ export class FilterFormComponent implements OnInit {
     const filtros = {
       PERIODO_ID: f.periodo,
       PERIODO: this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-      SUCURSAL_ID: f.gerencia,
-      SUCURSAL: this.gerencias.find((g) => g.rowid === f.gerencia)?.label || '',
+      LOCALIDAD_ID: f.localidad,
+      LOCALIDAD: this.localidades.find((g) => g.rowid === f.localidad)?.label || '',
       SECTOR_ID: f.sector,
-      SECTOR: this.sectores.find((s) => s.rowid === f.sector)?.label || '',
-      CONTRATO_ID: f.tipoContrato,
-      CONTRATO:
-        this.contratos.find((c) => c.rowid === f.tipoContrato)?.label || '',
-      TARIFA_ID: f.tipoTarifa,
-      TARIFA: this.tarifas.find((t) => t.rowid === f.tipoTarifa)?.label || '',
+      SECTOR: this.sectores.find((s) => s.code === f.sector)?.label || '',
+      // CONTRATO_ID: f.tipoContrato,
+      // CONTRATO:
+      //   this.contratos.find((c) => c.rowid === f.tipoContrato)?.label || '',
+      // TARIFA_ID: f.tipoTarifa,
+      // TARIFA: this.tarifas.find((t) => t.rowid === f.tipoTarifa)?.label || '',
     };
 
-    this.filterService.downloadExcelFacturacion(f.gerencia, filtros);
+    this.filterService.downloadExcelFacturacion(filtros);
   }
 
   private handleSuccess(response: any): void {
