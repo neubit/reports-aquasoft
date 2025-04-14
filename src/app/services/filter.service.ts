@@ -376,7 +376,7 @@ export class FilterService {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `Verificacion Lectura ${filtros.PERIODO}.xlsx`;
+          a.download = `Verificacion Lectura ${filtros.PERIODO_NOMBRE}.xlsx`;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
