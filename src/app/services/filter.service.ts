@@ -60,6 +60,7 @@ export class FilterService {
   }
 
   downloadExcel(periodo: string, entidad: string): void {
+    this.setLoadingState(true);
     this.http
       .get(`${this.apiUrl}/excel-nuevos-contratos`, {
         responseType: 'blob',
@@ -77,10 +78,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -90,6 +93,7 @@ export class FilterService {
     startDate: string,
     endDate: string
   ): void {
+    this.setLoadingState(true);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
@@ -118,10 +122,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -131,6 +137,7 @@ export class FilterService {
     startDate: string,
     endDate: string
   ): void {
+    this.setLoadingState(true);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
@@ -159,10 +166,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -172,6 +181,7 @@ export class FilterService {
     startDate: string,
     endDate: string
   ): void {
+    this.setLoadingState(true);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
@@ -200,10 +210,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -213,6 +225,7 @@ export class FilterService {
     startDate: string,
     endDate: string
   ): void {
+    this.setLoadingState(true);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
@@ -241,10 +254,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -254,6 +269,7 @@ export class FilterService {
     startDate: string,
     endDate: string
   ): void {
+    this.setLoadingState(true);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
@@ -282,10 +298,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -293,6 +311,7 @@ export class FilterService {
   downloadExcelFacturacion(
     filtros: any
   ): void {
+    this.setLoadingState(true);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
@@ -315,10 +334,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -329,6 +350,7 @@ export class FilterService {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
+    this.setLoadingState(true);
 
     this.http
       .post(`${this.apiUrl}/excel_facturacion_resumen`, filtros, {
@@ -348,10 +370,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
@@ -359,6 +383,8 @@ export class FilterService {
   downloadExcelVerLectura(
     filtros: any
   ): void {
+    this.setLoadingState(true);
+
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
@@ -381,10 +407,12 @@ export class FilterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.setLoadingState(false);
         },
         error: (error) => {
           console.error('Error al descargar el archivo:', error);
           alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
         },
       });
   }
