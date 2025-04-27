@@ -16,6 +16,10 @@ nz-sider {
   height: 100vh;
 }
 
+.message {
+  width: 100%;
+}
+
 .menu-sidebar {
   position: relative;
   z-index: 10;
