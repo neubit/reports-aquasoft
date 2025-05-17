@@ -27,9 +27,14 @@ import { FilterFormComponent } from './pages/filter-form/filter-form.component';
 export class AppComponent implements OnInit {
   isCollapsed = false;
   isLoading = false;
-  inIframe = false;
+  inIframe = true;
 
   ngOnInit(): void {
-    this.inIframe = window.self !== window.top;
+    const whitelist = ['comercial.japama.net', 'comercial.oomsapas.com'];
+    const currentHost = window.location.hostname;
+    const isWhitelisted = whitelist.includes(currentHost);
+    const isInIframe = window.self !== window.top;
+  
+    this.inIframe = isInIframe;
   }
 }

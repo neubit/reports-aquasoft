@@ -141,7 +141,7 @@
         <nz-select formControlName="rutas" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
           [nzDisabled]="filterForm.get('sector')?.value">
           @for (item of rutas; track item) {
-            <nz-option [nzLabel]="item.route" [nzValue]="item.rowid"></nz-option>
+            <nz-option [nzLabel]="item.route" [nzValue]="item.route"></nz-option>
           }
         </nz-select>
       </div>
