@@ -46,6 +46,11 @@ export const listOfReports = [
     value: 'verLectura',
     endpoint: 'reporte_verificador_de_lectura',
   },
+  {
+    label: 'Reporte Cartera',
+    value: 'reporteCartera',
+    endpoint: 'reporte_cartera',
+  },
   // {
   //   label: 'Instalaciones',
   //   value: 'instalaciones',

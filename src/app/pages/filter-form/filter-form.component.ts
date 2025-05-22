@@ -79,6 +79,7 @@ export class FilterFormComponent implements OnInit {
   facturacionSuccess = false;
   resumenFacturacionSuccess = false;
   verLecturaSuccess = false;
+  reporteCarteraSuccess = false;
 
   private requiredFields = REQUIRED_FIELDS;
 
@@ -112,7 +113,6 @@ export class FilterFormComponent implements OnInit {
     )
     .subscribe((selectedValues: any) => {
       if (selectedValues !== null) {
-        console.log('Selected localidades:', selectedValues);
         this.onLocalidadChange(selectedValues);
       }
     });
@@ -272,6 +272,15 @@ export class FilterFormComponent implements OnInit {
         'LOCALIDAD-ID': formValue.localidades?.join(','),
         'SECTOR-ID': formValue.sectores?.join(',')
       };
+    } else if(this.typeReport === 'reporteCartera') {
+      filtros = {
+        'PERIODO_ID': formValue.periodo,
+        'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'LOCALIDAD_ID': formValue.localidades?.join(','),
+        'LOCALIDAD_NOMBRE': 'test',
+        'SECTOR_ID': formValue.sectores?.join(','),
+        'SECTOR_NOMBRE': 'test',
+      };
     } else if (this.typeReport === 'noAdeudo') {
       filtros = {
         'SUCURSAL': formValue.localidad,
@@ -393,6 +402,21 @@ export class FilterFormComponent implements OnInit {
     this.filterService.downloadExcelResumenFacturacion(filtros);
   }
 
+  downloadExcelReporteCartera() {
+    const f = this.filterForm.value;
+
+    const filtros = {
+      'PERIODO_ID': f.periodo,
+      'PERIODO':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'LOCALIDAD_ID': f.localidades.join(','),
+      'LOCALIDAD': 'Test', //refactorizar
+      'SECTOR_ID': f.sectores.join(','),
+      'SECTOR': 'Test', //refactorizar
+    };
+
+    this.filterService.downloadExcelReporteCartera(filtros);
+  }
+
   downloadExcelVerLectura() { 
     const f = this.filterForm.value;
 
@@ -421,6 +445,7 @@ export class FilterFormComponent implements OnInit {
         facturacion: 'facturacionSuccess',
         resumenFacturacion: 'resumenFacturacionSuccess',
         verLectura: 'verLecturaSuccess',
+        reporteCartera: 'reporteCarteraSuccess',
       };
     
       const successKey = successMap[this.typeReport];
@@ -489,7 +514,7 @@ shouldShowPeriodField(): boolean {
   return !!(
     this.typeReport &&
     !['anexo13Convenios', 'cortesReconexion', 'noServicios', 'instalaciones', 'noAdeudo'].includes(this.typeReport) &&
-    ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura', 'resumenFacturacion'].includes(this.typeReport)
+    ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura', 'resumenFacturacion', 'reporteCartera'].includes(this.typeReport)
   );
 }
 
@@ -519,7 +544,8 @@ shouldShowDownloadButton(): boolean {
     'noServicios': this.noServiciosSuccess,
     'facturacion': this.facturacionSuccess,
     'resumenFacturacion': this.resumenFacturacionSuccess,
-    'verLectura': this.verLecturaSuccess
+    'verLectura': this.verLecturaSuccess,
+    'reporteCartera': this.reporteCarteraSuccess,
   };
 
   return !!successMap[this.typeReport as keyof typeof successMap];
@@ -538,6 +564,7 @@ getDownloadFunction(): () => void {
     'facturacion': this.downloadExcelFacturacion.bind(this),
     'resumenFacturacion': this.downloadExcelResumenFacturacion.bind(this),
     'verLectura': this.downloadExcelVerLectura.bind(this),
+    'reporteCartera': this.downloadExcelReporteCartera.bind(this),
   };
 
   return downloadMap[this.typeReport] || (() => {});
@@ -563,6 +590,7 @@ private resetExcelsFlags() {
   this.facturacionSuccess = false;
   this.resumenFacturacionSuccess = false;
   this.verLecturaSuccess = false;
+  this.reporteCarteraSuccess = false;
 }
 
 private dateRangeValidator(

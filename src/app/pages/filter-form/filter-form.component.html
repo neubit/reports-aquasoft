@@ -55,7 +55,7 @@
         }
       </nz-select>
     </div> -->
-    @if(typeReport !== 'resumenFacturacion') {
+    @if(typeReport !== 'resumenFacturacion' && typeReport !== 'reporteCartera') {
     <div nz-col nzSpan="24" nz-flex nzVertical="true">
       <span nz-typography><strong>LOCALIDAD*</strong></span>
       <nz-select formControlName="localidad" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
@@ -84,7 +84,7 @@
       }
     </div>
   }
-  @if(typeReport === 'resumenFacturacion') {
+  @if(typeReport === 'resumenFacturacion' || typeReport ==='reporteCartera') {
  <!-- Localidades Select -->
 <div nz-col nzSpan="24" nz-flex nzVertical="true">
   <span nz-typography><strong>LOCALIDAD/ES*</strong></span>
@@ -111,7 +111,7 @@
 
 <!-- Sectores Select -->
 <div nz-col nzSpan="24" nz-flex nzVertical="true">
-  <span nz-typography><strong>SECTOR/ES*</strong></span>
+  <span nz-typography><strong>SECTOR/ES</strong></span>
   <nz-select
     formControlName="sectores"
     [nzMaxTagCount]="3"
