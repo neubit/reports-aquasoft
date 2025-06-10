@@ -133,6 +133,28 @@
     <div style="color: red">El campo sectores es obligatorio.</div>
   }
 </div>
+
+@if(typeReport === 'reporteCartera') { 
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>ESTADO/S</strong></span>
+    <nz-select
+      formControlName="estados"
+      [nzMaxTagCount]="3"
+      [nzMaxTagPlaceholder]="tagPlaceHolderStatus"
+      nzMode="multiple"
+      nzShowSearch
+      nzAllowClear
+      nzPlaceHolder="Selecciona..."
+    >
+      @for (item of status; track item) {
+        <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+      }
+    </nz-select>
+  <ng-template #tagPlaceHolderStatus let-selectedList>
+    y {{ getSelectedCount(selectedList) }} más seleccionados
+  </ng-template>
+  </div>
+}
   }
 
     @if(typeReport === 'verLectura') {
@@ -145,6 +167,36 @@
           }
         </nz-select>
       </div>
+
+      <div nz-col nzSpan="24" nz-flex nzVertical="true">
+        <span nz-typography><strong>MANZANA INICIO*</strong></span>
+        <input nz-input placeholder="0" type="number" />
+
+
+      </div>
+
+      <div nz-col nzSpan="24" nz-flex nzVertical="true">
+        <span nz-typography><strong>MANZANA FIN*</strong></span>
+        <input nz-input placeholder="0" type="number" />
+
+
+      </div>
+
+      <div nz-col nzSpan="24" nz-flex nzVertical="true">
+        <span nz-typography><strong>LOTE INICIO*</strong></span>
+        <input nz-input placeholder="0" type="number" />
+
+
+      </div>
+
+      <div nz-col nzSpan="24" nz-flex nzVertical="true">
+        <span nz-typography><strong>LOTE FIN*</strong></span>
+        <input nz-input placeholder="0" type="number" />
+
+
+      </div>
+
+
     }
 
     <!-- <div nz-col nzSpan="24" nz-flex nzVertical="true">
@@ -191,6 +243,7 @@
         <div style="color: red">El campo Localidad es obligatorio.</div>
       }
     </div>
+
 
     <div nz-col nzSpan="24" nz-flex nzVertical="true">
       <span nz-typography><strong>FECHA INICIO*</strong></span>

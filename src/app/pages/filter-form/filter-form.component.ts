@@ -29,6 +29,7 @@ import {
   Periodo,
   Ruta,
   Sector,
+  Status,
   Tarifa,
 } from '../../models/filters';
 import { DatePipe } from '@angular/common';
@@ -66,6 +67,7 @@ export class FilterFormComponent implements OnInit {
   rutas: Ruta[] = [];
   contratos: Contrato[] = [];
   tarifas: Tarifa[] = [];
+  status: Status[] = [];
 
   submitted = false;
   isLoading = false;
@@ -102,6 +104,11 @@ export class FilterFormComponent implements OnInit {
         tipoTarifa: new FormControl(''),
         localidades: new FormControl<Array<string>>([]),
         sectores: new FormControl<Array<string>>([]),
+        estados: new FormControl<Array<string>>([]),
+        manzanaIni: new FormControl<string>(''),
+        manazanaFin: new FormControl<string>(''),
+        loteIni: new FormControl<string>(''),
+        loteFin: new FormControl<string>(''),
       },
       { validators: this.dateRangeValidator }
     );
@@ -209,7 +216,7 @@ export class FilterFormComponent implements OnInit {
     const resetValues = Object.keys(this.filterForm.controls)
       .filter(controlName => controlName !== 'report')
       .reduce((acc, controlName) => {
-        if(controlName === 'localidades' || controlName === 'sectores') {
+        if(controlName === 'localidades' || controlName === 'sectores' || controlName === 'estados') {
           acc[controlName] = [];
         } else {
         acc[controlName] = '';
@@ -254,7 +261,11 @@ export class FilterFormComponent implements OnInit {
         'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
         'SECTOR-ID': formValue.sector,
         'SECTOR-NOMBRE': this.sectores.find((s) => s.code === formValue.sector)?.label || '',
-        'RUTAS': formValue.rutas
+        'RUTAS': formValue.rutas,
+        'MZINC': formValue.manzanaIni,
+        'MZFIN': formValue.manzanaFin,
+        'LOTEINI': formValue.loteIni,
+        'LOTEFIN': formValue.loteFin
       };
     } else if (this.typeReport === 'facturacion') {
       filtros = {
@@ -274,12 +285,11 @@ export class FilterFormComponent implements OnInit {
       };
     } else if(this.typeReport === 'reporteCartera') {
       filtros = {
+        'LOCALIDAD_ID': formValue.localidades?.join(','),
         'PERIODO_ID': formValue.periodo,
         'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
-        'LOCALIDAD_ID': formValue.localidades?.join(','),
-        'LOCALIDAD_NOMBRE': 'test',
         'SECTOR_ID': formValue.sectores?.join(','),
-        'SECTOR_NOMBRE': 'test',
+        'STATUS_ID': formValue.estados?.join(','),
       };
     } else if (this.typeReport === 'noAdeudo') {
       filtros = {
@@ -406,13 +416,12 @@ export class FilterFormComponent implements OnInit {
     const f = this.filterForm.value;
 
     const filtros = {
-      'PERIODO_ID': f.periodo,
-      'PERIODO':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-      'LOCALIDAD_ID': f.localidades.join(','),
-      'LOCALIDAD': 'Test', //refactorizar
-      'SECTOR_ID': f.sectores.join(','),
-      'SECTOR': 'Test', //refactorizar
-    };
+        'LOCALIDAD_ID': f.localidades?.join(','),
+        'PERIODO_ID': f.periodo,
+        'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+        'SECTOR_ID': f.sectores?.join(','),
+        'STATUS_ID': f.estados?.join(','),
+      };
 
     this.filterService.downloadExcelReporteCartera(filtros);
   }
@@ -423,11 +432,15 @@ export class FilterFormComponent implements OnInit {
     const filtros = {
       'PERIODO_ID': f.periodo,
       'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-      'LOCALIDAD_ID': f.localidad,
+      'LOCALIDAD_ID': f.localidad, // Takes first selected
       'LOCALIDAD_NOMBRE':  this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
       'SECTOR_ID': f.sector,
       'SECTOR_NOMBRE': this.sectores.find((s) => s.code === f.sector)?.label || '',
-      'RUTAS': f.rutas
+      'RUTAS': f.rutas,
+      'MZINC': f.manzanaIni,
+      'MZFIN': f.manzanaFin,
+      'LOTEINI': f.loteIni,
+      'LOTEFIN': f.loteFin
     };
 
     this.filterService.downloadExcelVerLectura(filtros);
@@ -480,15 +493,15 @@ export class FilterFormComponent implements OnInit {
   private loadFilters(): void {
     forkJoin({
       periodos: this.filterService.getPeriodos().pipe(catchError(() => [])),
-      // gerencias: this.filterService.getGerencias().pipe(catchError(() => [])),
+      status: this.filterService.getStatus().pipe(catchError(() => [])),
       localidades: this.filterService.getLocalidades().pipe(catchError(() => [])),
       contratos: this.filterService.getContratos().pipe(catchError(() => [])),
       tarifas: this.filterService.getTarifas().pipe(catchError(() => [])),
     }).subscribe({
-      next: ({ periodos,localidades, contratos, tarifas }) => {
+      next: ({ periodos,status, localidades, contratos, tarifas }) => {
         this.periodos = periodos;
         this.localidades = localidades;
-        // this.gerencias = gerencias;
+        this.status = status;
         this.contratos = contratos;
         this.tarifas = tarifas;
       },

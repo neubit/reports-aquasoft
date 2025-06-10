@@ -14,6 +14,7 @@ export const REQUIRED_FIELDS: { [key: string]: string[] } = {
     'sector'
   ],
   contratosNuevos: [],
-  resumenFacturacion: ['periodo', 'localidades',],
   reporteCartera: ['periodo', 'localidades'],
+  resumenFacturacion: ['periodo', 'localidades',],
+  verLectura: ['periodo', 'localidad', 'sector', 'rutas'],
 };

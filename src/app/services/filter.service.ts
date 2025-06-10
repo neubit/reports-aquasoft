@@ -1,4 +1,4 @@
-import { Periodo, Ruta, Contrato, Gerencia, Tarifa, Localidad } from './../models/filters';
+import { Periodo, Ruta, Contrato, Gerencia, Tarifa, Localidad, Status } from './../models/filters';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
@@ -10,10 +10,8 @@ import { Filter, Sector } from '../models/filters';
 export class FilterService {
 
   private apiUrl = 'https://reporteador.japama.net/api';
-  
+  //private apiUrl ='http://127.0.0.1:8000/api';
 
-  // 'https://reporteador.japama.net/api';
-  //https://reporteador.japama.net/api/generar-reporte
 
   private filterDataSubject = new BehaviorSubject<any>(null);
   filterData$ = this.filterDataSubject.asObservable();
@@ -548,4 +546,16 @@ export class FilterService {
       })
     );
   }
+
+    /**
+   * Obtiene la lista de status desde el servidor.
+   * @returns Observable con un arreglo de status.
+   */
+    getStatus(): Observable<Status[]> {
+      return this.http.get<Status[]>(`${this.apiUrl}/status`).pipe(
+        catchError((error) => {
+          return throwError(() => new Error('Error al obtener tarifas.'));
+        })
+      );
+    }
 }

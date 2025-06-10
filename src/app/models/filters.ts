@@ -47,8 +47,13 @@ export interface Tarifa {
   label: string;
 }
 
-
 export interface Ruta {
   rowid: number;
   route: string;
+}
+
+export interface Status {
+  rowid: number;
+  code: string;
+  label: string;
 }
