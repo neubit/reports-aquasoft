@@ -57,3 +57,9 @@ export interface Status {
   code: string;
   label: string;
 }
+
+export interface Cajas {
+  rowid: number;
+  code: string;
+  label: string;
+}

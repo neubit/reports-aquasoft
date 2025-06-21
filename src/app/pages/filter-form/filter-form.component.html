@@ -5,263 +5,242 @@
     <nz-select formControlName="report" nzShowSearch nzAllowClear [nzMaxTagPlaceholder]="tagPlaceHolderReporte"
       (ngModelChange)="onReportChange($event)" nzPlaceHolder="Selecciona...">
       @for (item of listOfReports; track item) {
-        <nz-option [nzLabel]="item.label" [nzValue]="item.value"></nz-option>
+      <nz-option [nzLabel]="item.label" [nzValue]="item.value"></nz-option>
       }
     </nz-select>
     <ng-template #tagPlaceHolderReporte let-selectedList>{{ selectedList.length }} + Seleccionados</ng-template>
     @if(showError('report')) {
-      <div style="color: red">El campo reporte es obligatorio.</div>
+    <div style="color: red">El campo reporte es obligatorio.</div>
     }
   </div>
 
   @if(typeReport !== 'contratosNuevos') {
   <!-- Period Field (Conditional) -->
   @if(shouldShowPeriodField()) {
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>PERIODO*</strong></span>
-      <nz-select formControlName="periodo" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
-        @for (item of periodos; track item) {
-          <nz-option [nzLabel]="item.name" [nzValue]="item.rowid"></nz-option>
-        }
-      </nz-select>
-      @if(showError('periodo')) {
-        <div style="color: red">El campo Periodo es obligatorio.</div>
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>PERIODO*</strong></span>
+    <nz-select formControlName="periodo" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+      @for (item of periodos; track item) {
+      <nz-option [nzLabel]="item.name" [nzValue]="item.rowid"></nz-option>
       }
-    </div>
+    </nz-select>
+    @if(showError('periodo')) {
+    <div style="color: red">El campo Periodo es obligatorio.</div>
+    }
+  </div>
   }
 
   <!-- Contract Type Fields (Conditional) -->
   @if(shouldShowContractFields()) {
-    <!-- <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>ENTIDAD*</strong></span>
-      <nz-select formControlName="gerencia" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
-        (ngModelChange)="onGerenciaChange($event)">
-        @for (item of gerencias; track item) {
-          <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
-        }
-      </nz-select>
-      <ng-template #tagPlaceHolderPeriodo let-selectedList>{{ selectedList.length }} + Seleccionados</ng-template>
-      @if(showError('gerencia')) {
-        <div style="color: red">El campo Entidad es obligatorio.</div>
-      }
-    </div>
-
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>SISTEMA*</strong></span>
-      <nz-select formControlName="sistema" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
-        [nzDisabled]="filterForm.get('gerencia')?.value" (ngModelChange)="onSistemaChange($event)">
-        @for (item of sistemas; track item) {
-          <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
-        }
-      </nz-select>
-    </div> -->
-    @if(typeReport !== 'resumenFacturacion' && typeReport !== 'reporteCartera') {
+    @if(typeReport !== 'resumenFacturacion' && typeReport !== 'reporteCartera' && typeReport !== 'recaudacionCajaConceptos') {
     <div nz-col nzSpan="24" nz-flex nzVertical="true">
       <span nz-typography><strong>LOCALIDAD*</strong></span>
       <nz-select formControlName="localidad" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
         (ngModelChange)="onLocalidadChange($event)">
         @for (item of localidades; track item) {
-          <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+        <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
         }
       </nz-select>
       @if(showError('localidad')) {
-        <div style="color: red">El campo Localidad es obligatorio.</div>
+      <div style="color: red">El campo Localidad es obligatorio.</div>
       }
     </div>
 
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>SECTOR*</strong></span>
-      <nz-select formControlName="sector" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
-        [nzDisabled]="filterForm.get('localidad')?.value"
-        (ngModelChange)="onSectorChange($event)"
-        >
-        @for (item of sectores; track item) {
-          <nz-option [nzLabel]="item.label" [nzValue]="item.code"></nz-option>
-        }
-      </nz-select>
-      @if(showError('sector')) {
-        <div style="color: red">El campo Sector es obligatorio.</div>
+      @if(typeReport !== 'recaudacionPorCaja') {
+        <div nz-col nzSpan="24" nz-flex nzVertical="true">
+          <span nz-typography><strong>SECTOR*</strong></span>
+          <nz-select formControlName="sector" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
+            [nzDisabled]="filterForm.get('localidad')?.value" (ngModelChange)="onSectorChange($event)">
+            @for (item of sectores; track item) {
+            <nz-option [nzLabel]="item.label" [nzValue]="item.code"></nz-option>
+            }
+          </nz-select>
+          @if(showError('sector')) {
+          <div style="color: red">El campo Sector es obligatorio.</div>
+          }
+        </div>
       }
-    </div>
-  }
-  @if(typeReport === 'resumenFacturacion' || typeReport ==='reporteCartera') {
- <!-- Localidades Select -->
-<div nz-col nzSpan="24" nz-flex nzVertical="true">
-  <span nz-typography><strong>LOCALIDAD/ES*</strong></span>
-  <nz-select
-    formControlName="localidades"
-    [nzMaxTagCount]="3"
-    [nzMaxTagPlaceholder]="tagPlaceHolderLocalidades"
-    nzMode="multiple"
-    nzShowSearch
-    nzAllowClear
-    nzPlaceHolder="Selecciona..."
-  >
-    @for (item of localidades; track item) {
-      <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
-    }
-  </nz-select>
-<ng-template #tagPlaceHolderLocalidades let-selectedList>
-  y {{ getSelectedCount(selectedList) }} más seleccionados
-</ng-template>
-  @if (showError('localidades')) {
-    <div style="color: red">El campo localidades es obligatorio.</div>
-  }
-</div>
 
-<!-- Sectores Select -->
-<div nz-col nzSpan="24" nz-flex nzVertical="true">
-  <span nz-typography><strong>SECTOR/ES</strong></span>
-  <nz-select
-    formControlName="sectores"
-    [nzMaxTagCount]="3"
-    [nzMaxTagPlaceholder]="tagPlaceHolderSectores"
-    [nzDisabled]="!filterForm.get('localidades')?.value?.length"
-    nzMode="multiple"
-    nzShowSearch
-    nzAllowClear
-    nzPlaceHolder="Selecciona..."
-  >
-    @for (item of sectores; track item) {
-      <nz-option [nzLabel]="item.label" [nzValue]="item.code"></nz-option>
-    }
-  </nz-select>
-<ng-template #tagPlaceHolderSectores let-selectedList>
-  y {{ getSelectedSectoresCount(selectedList) }} más seleccionados
-</ng-template>
-  @if (showError('sectores')) {
-    <div style="color: red">El campo sectores es obligatorio.</div>
-  }
-</div>
-
-@if(typeReport === 'reporteCartera') { 
-  <div nz-col nzSpan="24" nz-flex nzVertical="true">
-    <span nz-typography><strong>ESTADO/S</strong></span>
-    <nz-select
-      formControlName="estados"
-      [nzMaxTagCount]="3"
-      [nzMaxTagPlaceholder]="tagPlaceHolderStatus"
-      nzMode="multiple"
-      nzShowSearch
-      nzAllowClear
-      nzPlaceHolder="Selecciona..."
-    >
-      @for (item of status; track item) {
-        <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
-      }
-    </nz-select>
-  <ng-template #tagPlaceHolderStatus let-selectedList>
-    y {{ getSelectedCount(selectedList) }} más seleccionados
-  </ng-template>
-  </div>
-}
-  }
-
-    @if(typeReport === 'verLectura') {
+      @if(typeReport === 'recaudacionPorCaja') {
       <div nz-col nzSpan="24" nz-flex nzVertical="true">
-        <span nz-typography><strong>RUTA*</strong></span>
-        <nz-select formControlName="rutas" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
-          [nzDisabled]="filterForm.get('sector')?.value">
-          @for (item of rutas; track item) {
-            <nz-option [nzLabel]="item.route" [nzValue]="item.route"></nz-option>
+        <span nz-typography><strong>CAJA*</strong></span>
+        <nz-select formControlName="caja" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+          @for (item of cajas; track item) {
+          <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
           }
         </nz-select>
-      </div>
+        @if(showError('caja')) {
+        <div style="color: red">El campo Caja es obligatorio.</div>
+        }
+      </div>  
 
       <div nz-col nzSpan="24" nz-flex nzVertical="true">
-        <span nz-typography><strong>MANZANA INICIO*</strong></span>
-        <input nz-input placeholder="0" type="number" />
-
-
+        <span nz-typography><strong>FECHA PAGO*</strong></span>
+        <nz-date-picker formControlName="paymentDate"
+          nzPlaceHolder="Fecha Pago"></nz-date-picker>
       </div>
+      }
 
-      <div nz-col nzSpan="24" nz-flex nzVertical="true">
-        <span nz-typography><strong>MANZANA FIN*</strong></span>
-        <input nz-input placeholder="0" type="number" />
+      
+    }
+    @if(typeReport === 'resumenFacturacion' || typeReport ==='reporteCartera') {
+    <!-- Localidades Select -->
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography><strong>LOCALIDAD/ES*</strong></span>
+      <nz-select formControlName="localidades" [nzMaxTagCount]="3" [nzMaxTagPlaceholder]="tagPlaceHolderLocalidades"
+        nzMode="multiple" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+        @for (item of localidades; track item) {
+        <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+        }
+      </nz-select>
+      <ng-template #tagPlaceHolderLocalidades let-selectedList>
+        y {{ getSelectedCount(selectedList) }} más seleccionados
+      </ng-template>
+      @if (showError('localidades')) {
+      <div style="color: red">El campo localidades es obligatorio.</div>
+      }
+    </div>
 
+    <!-- Sectores Select -->
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography><strong>SECTOR/ES</strong></span>
+      <nz-select formControlName="sectores" [nzMaxTagCount]="3" [nzMaxTagPlaceholder]="tagPlaceHolderSectores"
+        [nzDisabled]="!filterForm.get('localidades')?.value?.length" nzMode="multiple" nzShowSearch nzAllowClear
+        nzPlaceHolder="Selecciona...">
+        @for (item of sectores; track item) {
+        <nz-option [nzLabel]="item.label" [nzValue]="item.code"></nz-option>
+        }
+      </nz-select>
+      <ng-template #tagPlaceHolderSectores let-selectedList>
+        y {{ getSelectedSectoresCount(selectedList) }} más seleccionados
+      </ng-template>
+      @if (showError('sectores')) {
+      <div style="color: red">El campo sectores es obligatorio.</div>
+      }
+    </div>
 
-      </div>
-
-      <div nz-col nzSpan="24" nz-flex nzVertical="true">
-        <span nz-typography><strong>LOTE INICIO*</strong></span>
-        <input nz-input placeholder="0" type="number" />
-
-
-      </div>
-
-      <div nz-col nzSpan="24" nz-flex nzVertical="true">
-        <span nz-typography><strong>LOTE FIN*</strong></span>
-        <input nz-input placeholder="0" type="number" />
-
-
-      </div>
-
-
+    @if(typeReport === 'reporteCartera') {
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography><strong>ESTADO/S</strong></span>
+      <nz-select formControlName="estados" [nzMaxTagCount]="3" [nzMaxTagPlaceholder]="tagPlaceHolderStatus"
+        nzMode="multiple" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+        @for (item of status; track item) {
+        <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+        }
+      </nz-select>
+      <ng-template #tagPlaceHolderStatus let-selectedList>
+        y {{ getSelectedCount(selectedList) }} más seleccionados
+      </ng-template>
+    </div>
+    }
     }
 
-    <!-- <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>TIPO CONTRATO</strong></span>
-      <nz-select formControlName="tipoContrato" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
-        @for (item of contratos; track item) {
-          <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+    @if(typeReport === 'verLectura') {
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography><strong>RUTA*</strong></span>
+      <nz-select formControlName="rutas" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
+        [nzDisabled]="filterForm.get('sector')?.value">
+        @for (item of rutas; track item) {
+        <nz-option [nzLabel]="item.route" [nzValue]="item.route"></nz-option>
         }
       </nz-select>
     </div>
 
     <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>TIPO TARIFA</strong></span>
-      <nz-select formControlName="tipoTarifa" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
-        @for (item of tarifas; track item) {
-          <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
-        }
-      </nz-select>
-    </div> -->
+      <span nz-typography><strong>MANZANA *</strong></span>
+      <div nz-flex nzHorizontal="true" nzGap="10px">
+        <input nz-input formControlName="manzanaIni" placeholder="Inicio" type="number" />
+        <input nz-input formControlName="manzanaFin" placeholder="Fin" type="number" />
+      </div>
+
+    </div>
+
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography><strong>LOTE*</strong></span>
+      <div nz-flex nzHorizontal="true" nzGap="10px">
+        <input nz-input formControlName="loteIni" placeholder="Inicio" type="number" />
+        <input nz-input formControlName="loteFin" placeholder="Fin" type="number" />
+      </div>
+    </div>
+   }
+
   }
 
   <!-- Service Number Field (Conditional) -->
   @if(typeReport === 'duplicadoServ') {
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>NÚMERO SERVICIO*</strong></span>
-      <input nz-input placeholder="Digite el número de servicio" formControlName="numserv" />
-      @if(showError('numserv')) {
-        <div style="color: red">El campo Número Servicio es obligatorio.</div>
-      }
-    </div>
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>NÚMERO SERVICIO*</strong></span>
+    <input nz-input placeholder="Digite el número de servicio" formControlName="numserv" />
+    @if(showError('numserv')) {
+    <div style="color: red">El campo Número Servicio es obligatorio.</div>
+    }
+  </div>
   }
 
   <!-- Date Range Fields (Conditional) -->
   @if(shouldShowDateRangeFields()) {
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>LOCALIDAD*</strong></span>
-      <nz-select formControlName="localidad" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
-        (ngModelChange)="onLocalidadChange($event)">
-        @for (item of localidades; track item) {
-          <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
-        }
-      </nz-select>
-      @if(showError('localidad')) {
-        <div style="color: red">El campo Localidad es obligatorio.</div>
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>LOCALIDAD*</strong></span>
+    <nz-select formControlName="localidad" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
+      (ngModelChange)="onLocalidadChange($event)">
+      @for (item of localidades; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
       }
-    </div>
+    </nz-select>
+    @if(showError('localidad')) {
+    <div style="color: red">El campo Localidad es obligatorio.</div>
+    }
+  </div>
+
+  @if(typeReport === 'recaudacionCajaConceptos') { 
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>CONCEPTO/S*</strong></span>
+    <nz-select formControlName="conceptos" [nzMaxTagCount]="3" [nzMaxTagPlaceholder]="tagPlaceHolderConceptos"
+      nzMode="multiple" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+      @for (item of conceptos; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+      }
+    </nz-select>
+    <ng-template #tagPlaceHolderConceptos let-selectedList>
+      y {{ getSelectedCount(selectedList) }} más seleccionados
+    </ng-template>
+    @if (showError('conceptos')) {
+    <div style="color: red">El campo conceptos es obligatorio.</div>
+    }
+  </div>
+
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>CAJA*</strong></span>
+    <nz-select formControlName="caja" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+      @for (item of cajas; track item) {
+      <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+      }
+    </nz-select>
+    @if(showError('caja')) {
+    <div style="color: red">El campo Caja es obligatorio.</div>
+    }
+  </div>  
+  }
 
 
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>FECHA INICIO*</strong></span>
-      <nz-date-picker formControlName="startDate" (ngModelChange)="onChange()" nzPlaceHolder="Fecha Inicio"></nz-date-picker>
-    </div>
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>FECHA INICIO*</strong></span>
+    <nz-date-picker formControlName="startDate" (ngModelChange)="onChange()"
+      nzPlaceHolder="Fecha Inicio"></nz-date-picker>
+  </div>
 
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>FECHA FIN*</strong></span>
-      <nz-date-picker formControlName="endDate" (ngModelChange)="onChange()" nzPlaceHolder="Fecha Fin"></nz-date-picker>
-    </div>
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>FECHA FIN*</strong></span>
+    <nz-date-picker formControlName="endDate" (ngModelChange)="onChange()" nzPlaceHolder="Fecha Fin"></nz-date-picker>
+  </div>
 
     @if (filterForm.errors?.['dateRangeInvalid']) {
-      <div nz-col nzSpan="24" nz-flex nzVertical="true">
-        <span nz-typography style="color: red;"><strong>Fecha Fin debe ser mayor que la Fecha Inicio.</strong></span>
-      </div>
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography style="color: red;"><strong>Fecha Fin debe ser mayor que la Fecha Inicio.</strong></span>
+    </div>
     }
   }
-}
+  }
 
   <!-- Action Buttons -->
   <div nz-flex nzHorizontal="true" nzAlign="center" nzJustify="center">
@@ -272,10 +251,10 @@
 
   <!-- Download Button (Conditional) -->
   @if(shouldShowDownloadButton()) {
-    <div nz-flex nzHorizontal="true" nzAlign="center" nzJustify="center">
-      <button nz-button nzType="default" [nzLoading]="isLoading" (click)="getDownloadFunction()()">
-        Descargar Excel
-      </button>
-    </div>
+  <div nz-flex nzHorizontal="true" nzAlign="center" nzJustify="center">
+    <button nz-button nzType="default" [nzLoading]="isLoading" (click)="getDownloadFunction()()">
+      Descargar Excel
+    </button>
+  </div>
   }
 </div>

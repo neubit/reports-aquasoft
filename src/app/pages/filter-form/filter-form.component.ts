@@ -23,6 +23,7 @@ import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 
 import { FilterService } from '../../services/filter.service';
 import {
+  Cajas,
   Contrato,
   Gerencia,
   Localidad,
@@ -61,13 +62,14 @@ export class FilterFormComponent implements OnInit {
   listOfReports = listOfReports;
 
   periodos: Periodo[] = [];
-  gerencias: Gerencia[] = [];
   localidades: Localidad[] = [];
   sectores: Sector[] = [];
   rutas: Ruta[] = [];
   contratos: Contrato[] = [];
   tarifas: Tarifa[] = [];
   status: Status[] = [];
+  cajas: Cajas[] = [];
+  conceptos: any[] = [];
 
   submitted = false;
   isLoading = false;
@@ -82,6 +84,8 @@ export class FilterFormComponent implements OnInit {
   resumenFacturacionSuccess = false;
   verLecturaSuccess = false;
   reporteCarteraSuccess = false;
+  recaudacionPorCajaSuccess = false;
+  recaudacionCajaConceptosSuccess = false;
 
   private requiredFields = REQUIRED_FIELDS;
 
@@ -106,23 +110,26 @@ export class FilterFormComponent implements OnInit {
         sectores: new FormControl<Array<string>>([]),
         estados: new FormControl<Array<string>>([]),
         manzanaIni: new FormControl<string>(''),
-        manazanaFin: new FormControl<string>(''),
+        manzanaFin: new FormControl<string>(''),
         loteIni: new FormControl<string>(''),
         loteFin: new FormControl<string>(''),
+        caja: new FormControl<string>(''),
+        paymentDate: new FormControl<string>(''),
+        conceptos: new FormControl<Array<string>>([]),
       },
       { validators: this.dateRangeValidator }
     );
 
     this.filterForm.get('localidades')?.valueChanges
-    .pipe(
-      debounceTime(500),
-      distinctUntilChanged() // Opcional: solo emite si el valor cambió
-    )
-    .subscribe((selectedValues: any) => {
-      if (selectedValues !== null) {
-        this.onLocalidadChange(selectedValues);
-      }
-    });
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged() // Opcional: solo emite si el valor cambió
+      )
+      .subscribe((selectedValues: any) => {
+        if (selectedValues !== null) {
+          this.onLocalidadChange(selectedValues);
+        }
+      });
   }
 
   ngOnInit(): void {
@@ -133,20 +140,20 @@ export class FilterFormComponent implements OnInit {
 
   onLocalidadChange(sistemaRowId: any): void {
     let sistemaRowIdStr: string = '';
-  
+
     if (Array.isArray(sistemaRowId)) {
       sistemaRowIdStr = sistemaRowId.join(',');
     } else if (sistemaRowId !== null && sistemaRowId !== undefined && sistemaRowId !== '') {
       sistemaRowIdStr = sistemaRowId.toString();
     }
-      if (!sistemaRowIdStr) {
+    if (!sistemaRowIdStr) {
       this.sectores = [];
       this.filterForm.get('sector')?.disable();
       this.filterForm.get('sectores')?.disable();
 
       return;
     }
-  
+
     this.filterForm.get('sector')?.setValue('');
     this.filterForm.get('sectores')?.setValue([]);
 
@@ -216,12 +223,12 @@ export class FilterFormComponent implements OnInit {
     const resetValues = Object.keys(this.filterForm.controls)
       .filter(controlName => controlName !== 'report')
       .reduce((acc, controlName) => {
-        if(controlName === 'localidades' || controlName === 'sectores' || controlName === 'estados') {
+        if (controlName === 'localidades' || controlName === 'sectores' || controlName === 'estados' || controlName === 'conceptos') {
           acc[controlName] = [];
         } else {
-        acc[controlName] = '';
+          acc[controlName] = '';
         }
-        
+
         return acc;
       }, {} as any);
 
@@ -233,7 +240,7 @@ export class FilterFormComponent implements OnInit {
   }
 
   applyFilters(): void {
-  this.resetExcelsFlags();
+    this.resetExcelsFlags();
 
     this.submitted = true;
     if (this.filterForm.valid) {
@@ -253,12 +260,12 @@ export class FilterFormComponent implements OnInit {
   private handleDuplicadoReport(formValue: any): void {
     let filtros: any = {};
 
-   if (this.typeReport === 'verLectura') {
+    if (this.typeReport === 'verLectura') {
       filtros = {
         'PERIODO-ID': formValue.periodo,
-        'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'PERIODO-NOMBRE': this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
         'LOCALIDAD-ID': formValue.localidad, // Takes first selected
-        'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
+        'LOCALIDAD-NOMBRE': this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
         'SECTOR-ID': formValue.sector,
         'SECTOR-NOMBRE': this.sectores.find((s) => s.code === formValue.sector)?.label || '',
         'RUTAS': formValue.rutas,
@@ -270,24 +277,24 @@ export class FilterFormComponent implements OnInit {
     } else if (this.typeReport === 'facturacion') {
       filtros = {
         'PERIODO-ID': formValue.periodo,
-        'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'PERIODO-NOMBRE': this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
         'LOCALIDAD-ID': formValue.localidad,
-        'LOCALIDAD-NOMBRE':  this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
+        'LOCALIDAD-NOMBRE': this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
         'SECTOR-ID': formValue.sector,
         'SECTOR-NOMBRE': this.sectores.find((s) => s.code === formValue.sector)?.label || '',
       };
     } else if (this.typeReport === 'resumenFacturacion') {
       filtros = {
         'PERIODO-ID': formValue.periodo,
-        'PERIODO-NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'PERIODO-NOMBRE': this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
         'LOCALIDAD-ID': formValue.localidades?.join(','),
         'SECTOR-ID': formValue.sectores?.join(',')
       };
-    } else if(this.typeReport === 'reporteCartera') {
+    } else if (this.typeReport === 'reporteCartera') {
       filtros = {
         'LOCALIDAD_ID': formValue.localidades?.join(','),
         'PERIODO_ID': formValue.periodo,
-        'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
+        'PERIODO_NOMBRE': this.periodos.find((p) => p.rowid === formValue.periodo)?.name || '',
         'SECTOR_ID': formValue.sectores?.join(','),
         'STATUS_ID': formValue.estados?.join(','),
       };
@@ -297,7 +304,22 @@ export class FilterFormComponent implements OnInit {
         'FECHA-INI': this.formatDate(formValue.startDate),
         'FECHA-FIN': this.formatDate(formValue.endDate)
       };
-      
+    } else if (this.typeReport === 'recaudacionPorCaja') {
+      filtros = {
+        'LOCALIDAD_ID': formValue.localidad,
+        'LOCALIDAD_NOMBRE': this.localidades.find((l) => l.rowid === formValue.localidad)?.label || '',
+        'CAJA_ID': formValue.caja,
+        'CAJA_NOMBRE': this.cajas.find((c) => c.rowid === formValue.caja)?.label || '',
+        'FECHA_PAGO': this.formatDate(formValue.paymentDate)
+      };
+    } else if (this.typeReport === 'recaudacionCajaConceptos') {
+        filtros = {
+          "CAJA": formValue.caja,
+          "COMUNIDAD": formValue.localidad,
+          "CONCEPTOS": formValue.conceptos.join(','),
+          "FECHA_INI": this.formatDate(formValue.startDate),
+          "FECHA_FIN": this.formatDate(formValue.endDate),
+      }
     }
 
     const reportApi = this.listOfReports.find(
@@ -324,7 +346,7 @@ export class FilterFormComponent implements OnInit {
     const periodo =
       this.periodos.find((p) => p.rowid === f.periodo)?.name || '';
     const entidad =
-      this.gerencias.find((p) => p.rowid === f.gerencia)?.label || '';
+      this.localidades.find((p) => p.rowid === f.localidad)?.label || '';
 
     this.filterService.downloadExcel(periodo, entidad);
   }
@@ -389,14 +411,37 @@ export class FilterFormComponent implements OnInit {
       LOCALIDAD: this.localidades.find((g) => g.rowid === f.localidad)?.label || '',
       SECTOR_ID: f.sector,
       SECTOR: this.sectores.find((s) => s.code === f.sector)?.label || '',
-      // CONTRATO_ID: f.tipoContrato,
-      // CONTRATO:
-      //   this.contratos.find((c) => c.rowid === f.tipoContrato)?.label || '',
-      // TARIFA_ID: f.tipoTarifa,
-      // TARIFA: this.tarifas.find((t) => t.rowid === f.tipoTarifa)?.label || '',
     };
 
     this.filterService.downloadExcelFacturacion(filtros);
+  }
+
+  downloadExcelRecaudacionPorCaja() {
+    const f = this.filterForm.value;
+
+    const filtros = {
+      'LOCALIDAD_ID': f.localidad,
+      'LOCALIDAD_NOMBRE': this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
+      'CAJA_ID': f.caja,
+      'CAJA_NOMBRE': this.cajas.find((c) => c.rowid === f.caja)?.label || '',
+      'FECHA_PAGO': this.formatDate(f.paymentDate)
+    };
+
+    this.filterService.downloadExcelRecaudacionPorCaja(filtros);
+  }
+
+  downloadExcelRecaudacionCajaConceptos() {
+    const f = this.filterForm.value;
+
+    const filtros = {
+      "CAJA": f.caja,
+      "COMUNIDAD": f.localidad,
+      "CONCEPTOS": f.conceptos.join(','),
+      "FECHA_INI": this.formatDate(f.startDate),
+      "FECHA_FIN": this.formatDate(f.endDate),
+  }
+
+    this.filterService.downloadExcelRecaudacionCajaConceptos(filtros);
   }
 
   downloadExcelResumenFacturacion() {
@@ -404,7 +449,7 @@ export class FilterFormComponent implements OnInit {
 
     const filtros = {
       'PERIODO_ID': f.periodo,
-      'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'PERIODO_NOMBRE': this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
       'LOCALIDAD_ID': f.localidades.join(','),
       'SECTOR_ID': f.sectores.join(',')
     };
@@ -416,24 +461,24 @@ export class FilterFormComponent implements OnInit {
     const f = this.filterForm.value;
 
     const filtros = {
-        'LOCALIDAD_ID': f.localidades?.join(','),
-        'PERIODO_ID': f.periodo,
-        'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-        'SECTOR_ID': f.sectores?.join(','),
-        'STATUS_ID': f.estados?.join(','),
-      };
+      'LOCALIDAD_ID': f.localidades?.join(','),
+      'PERIODO_ID': f.periodo,
+      'PERIODO_NOMBRE': this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'SECTOR_ID': f.sectores?.join(','),
+      'STATUS_ID': f.estados?.join(','),
+    };
 
     this.filterService.downloadExcelReporteCartera(filtros);
   }
 
-  downloadExcelVerLectura() { 
+  downloadExcelVerLectura() {
     const f = this.filterForm.value;
 
     const filtros = {
       'PERIODO_ID': f.periodo,
-      'PERIODO_NOMBRE':  this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
-      'LOCALIDAD_ID': f.localidad, // Takes first selected
-      'LOCALIDAD_NOMBRE':  this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
+      'PERIODO_NOMBRE': this.periodos.find((p) => p.rowid === f.periodo)?.name || '',
+      'LOCALIDAD_ID': f.localidad,
+      'LOCALIDAD_NOMBRE': this.localidades.find((l) => l.rowid === f.localidad)?.label || '',
       'SECTOR_ID': f.sector,
       'SECTOR_NOMBRE': this.sectores.find((s) => s.code === f.sector)?.label || '',
       'RUTAS': f.rutas,
@@ -459,8 +504,10 @@ export class FilterFormComponent implements OnInit {
         resumenFacturacion: 'resumenFacturacionSuccess',
         verLectura: 'verLecturaSuccess',
         reporteCartera: 'reporteCarteraSuccess',
+        recaudacionPorCaja: 'recaudacionPorCajaSuccess',
+        recaudacionCajaConceptos: 'recaudacionCajaConceptosSuccess',
       };
-    
+
       const successKey = successMap[this.typeReport];
       if (successKey) {
         (this[successKey as keyof FilterFormComponent] as boolean) = true;
@@ -497,15 +544,19 @@ export class FilterFormComponent implements OnInit {
       localidades: this.filterService.getLocalidades().pipe(catchError(() => [])),
       contratos: this.filterService.getContratos().pipe(catchError(() => [])),
       tarifas: this.filterService.getTarifas().pipe(catchError(() => [])),
+      cajas: this.filterService.getCajas().pipe(catchError(() => [])),
+      conceptos: this.filterService.getConceptos().pipe(catchError(() => [])),
     }).subscribe({
-      next: ({ periodos,status, localidades, contratos, tarifas }) => {
+      next: ({ periodos, status, localidades, contratos, tarifas, cajas, conceptos }) => {
         this.periodos = periodos;
         this.localidades = localidades;
         this.status = status;
         this.contratos = contratos;
         this.tarifas = tarifas;
+        this.cajas = cajas;
+        this.conceptos = conceptos;
       },
-      error: () => {},
+      error: () => { },
     });
   }
 
@@ -513,116 +564,122 @@ export class FilterFormComponent implements OnInit {
     this.filterForm.updateValueAndValidity(); // Ensure validation is triggered on change
   }
 
-showError(controlName: string): boolean {
-  const control = this.filterForm.get(controlName);
-  return !!(
-    this.submitted &&
-    control?.invalid &&
-    !control?.touched &&
-    control?.hasError('required')
-  );
-}
-
-shouldShowPeriodField(): boolean {
-  return !!(
-    this.typeReport &&
-    !['anexo13Convenios', 'cortesReconexion', 'noServicios', 'instalaciones', 'noAdeudo'].includes(this.typeReport) &&
-    ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura', 'resumenFacturacion', 'reporteCartera'].includes(this.typeReport)
-  );
-}
-
-shouldShowContractFields(): boolean {
-  return !!(
-    this.typeReport &&
-    !['duplicadoServ', 'anexo13Convenios', 'cortesReconexion', 'noServicios', 'noAdeudo', 'instalaciones'].includes(this.typeReport)
-  );
-}
-
-shouldShowDateRangeFields(): boolean {
-  return !!(
-    this.typeReport &&
-    ['anexo13Convenios', 'cortesReconexion', 'noServicios', 'noAdeudo', 'instalaciones'].includes(this.typeReport)
-  );
-}
-
-shouldShowDownloadButton(): boolean {
-  if (!this.typeReport) return false;
-
-  const successMap = {
-    'contratosNuevos': this.contratosNuevosSuccess,
-    'anexo13Convenios': this.anexo13Success,
-    'cortesReconexion': this.cortesReconexionSuccess,
-    'instalaciones': this.instalacionesSuccess,
-    'noAdeudo': this.noAdeudoSuccess,
-    'noServicios': this.noServiciosSuccess,
-    'facturacion': this.facturacionSuccess,
-    'resumenFacturacion': this.resumenFacturacionSuccess,
-    'verLectura': this.verLecturaSuccess,
-    'reporteCartera': this.reporteCarteraSuccess,
-  };
-
-  return !!successMap[this.typeReport as keyof typeof successMap];
-}
-
-getDownloadFunction(): () => void {
-  if (!this.typeReport) return () => {};
-
-  const downloadMap: Record<string, () => void> = {
-    'contratosNuevos': this.downloadExcel.bind(this),
-    'anexo13Convenios': this.downloadExcelAnexo13.bind(this),
-    'cortesReconexion': this.downloadExcelCortesReconexion.bind(this),
-    'instalaciones': this.downloadExcelInstalaciones.bind(this),
-    'noAdeudo': this.downloadExcelNoAdeudo.bind(this),
-    'noServicios': this.downloadExcelNoServicios.bind(this),
-    'facturacion': this.downloadExcelFacturacion.bind(this),
-    'resumenFacturacion': this.downloadExcelResumenFacturacion.bind(this),
-    'verLectura': this.downloadExcelVerLectura.bind(this),
-    'reporteCartera': this.downloadExcelReporteCartera.bind(this),
-  };
-
-  return downloadMap[this.typeReport] || (() => {});
-}
-
-getSelectedCount(selectedList: any): number {
-  if (!selectedList) return 0;
-  return Array.isArray(selectedList) ? selectedList.length : 0;
-}
-
-getSelectedSectoresCount(selectedList: any): number {
-  if (!selectedList) return 0;
-  return Array.isArray(selectedList) ? selectedList.length : 0;
-}
-
-private resetExcelsFlags() {
-  this.contratosNuevosSuccess = false;
-  this.anexo13Success = false;
-  this.cortesReconexionSuccess = false;
-  this.instalacionesSuccess = false;
-  this.noAdeudoSuccess = false;
-  this.noServiciosSuccess = false;
-  this.facturacionSuccess = false;
-  this.resumenFacturacionSuccess = false;
-  this.verLecturaSuccess = false;
-  this.reporteCarteraSuccess = false;
-}
-
-private dateRangeValidator(
-  group: FormGroup
-): { [key: string]: boolean } | null {
-  const startDate = group.get('startDate')?.value;
-  const endDate = group.get('endDate')?.value;
-  if (startDate && endDate && startDate >= endDate) {
-    return { dateRangeInvalid: true };
+  showError(controlName: string): boolean {
+    const control = this.filterForm.get(controlName);
+    return !!(
+      this.submitted &&
+      control?.invalid &&
+      !control?.touched &&
+      control?.hasError('required')
+    );
   }
-  return null;
-}
 
-private formatDate(dateString: string): string {
-  if (!dateString) {
-    return ''; // Return an empty string if the date is not valid
+  shouldShowPeriodField(): boolean {
+    return !!(
+      this.typeReport &&
+      !['anexo13Convenios', 'cortesReconexion', 'noServicios', 'instalaciones', 'noAdeudo'].includes(this.typeReport) &&
+      ['facturacion', 'duplicadoFija', 'duplicadoLectura', 'duplicadoServ', 'verLectura', 'resumenFacturacion', 'reporteCartera'].includes(this.typeReport)
+    );
   }
-  const formattedDate = this.datePipe.transform(dateString, 'yyyy-MM-dd');
-  return formattedDate || ''; // Use Angular's DatePipe to format the date
-}
+
+  shouldShowContractFields(): boolean {
+    return !!(
+      this.typeReport &&
+      !['duplicadoServ', 'anexo13Convenios', 'cortesReconexion', 'noServicios', 'noAdeudo', 'instalaciones'].includes(this.typeReport)
+    );
+  }
+
+  shouldShowDateRangeFields(): boolean {
+    return !!(
+      this.typeReport &&
+      ['anexo13Convenios', 'cortesReconexion', 'noServicios', 'noAdeudo', 'instalaciones', 'recaudacionCajaConceptos'].includes(this.typeReport)
+    );
+  }
+
+  shouldShowDownloadButton(): boolean {
+    if (!this.typeReport) return false;
+
+    const successMap = {
+      'contratosNuevos': this.contratosNuevosSuccess,
+      'anexo13Convenios': this.anexo13Success,
+      'cortesReconexion': this.cortesReconexionSuccess,
+      'instalaciones': this.instalacionesSuccess,
+      'noAdeudo': this.noAdeudoSuccess,
+      'noServicios': this.noServiciosSuccess,
+      'facturacion': this.facturacionSuccess,
+      'resumenFacturacion': this.resumenFacturacionSuccess,
+      'verLectura': this.verLecturaSuccess,
+      'reporteCartera': this.reporteCarteraSuccess,
+      'recaudacionPorCaja': this.recaudacionPorCajaSuccess,
+      'recaudacionCajaConceptos': this.recaudacionCajaConceptosSuccess
+    };
+
+    return !!successMap[this.typeReport as keyof typeof successMap];
+  }
+
+  getDownloadFunction(): () => void {
+    if (!this.typeReport) return () => { };
+
+    const downloadMap: Record<string, () => void> = {
+      'contratosNuevos': this.downloadExcel.bind(this),
+      'anexo13Convenios': this.downloadExcelAnexo13.bind(this),
+      'cortesReconexion': this.downloadExcelCortesReconexion.bind(this),
+      'instalaciones': this.downloadExcelInstalaciones.bind(this),
+      'noAdeudo': this.downloadExcelNoAdeudo.bind(this),
+      'noServicios': this.downloadExcelNoServicios.bind(this),
+      'facturacion': this.downloadExcelFacturacion.bind(this),
+      'resumenFacturacion': this.downloadExcelResumenFacturacion.bind(this),
+      'verLectura': this.downloadExcelVerLectura.bind(this),
+      'reporteCartera': this.downloadExcelReporteCartera.bind(this),
+      'recaudacionPorCaja': this.downloadExcelRecaudacionPorCaja.bind(this),
+      'recaudacionCajaConceptos': this.downloadExcelRecaudacionCajaConceptos.bind(this)
+    };
+
+    return downloadMap[this.typeReport] || (() => { });
+  }
+
+  getSelectedCount(selectedList: any): number {
+    if (!selectedList) return 0;
+    return Array.isArray(selectedList) ? selectedList.length : 0;
+  }
+
+  getSelectedSectoresCount(selectedList: any): number {
+    if (!selectedList) return 0;
+    return Array.isArray(selectedList) ? selectedList.length : 0;
+  }
+
+  private resetExcelsFlags() {
+    this.contratosNuevosSuccess = false;
+    this.anexo13Success = false;
+    this.cortesReconexionSuccess = false;
+    this.instalacionesSuccess = false;
+    this.noAdeudoSuccess = false;
+    this.noServiciosSuccess = false;
+    this.facturacionSuccess = false;
+    this.resumenFacturacionSuccess = false;
+    this.verLecturaSuccess = false;
+    this.reporteCarteraSuccess = false;
+    this.recaudacionPorCajaSuccess = false;
+    this.recaudacionCajaConceptosSuccess = false;
+  }
+
+  private dateRangeValidator(
+    group: FormGroup
+  ): { [key: string]: boolean } | null {
+    const startDate = group.get('startDate')?.value;
+    const endDate = group.get('endDate')?.value;
+    if (startDate && endDate && startDate >= endDate) {
+      return { dateRangeInvalid: true };
+    }
+    return null;
+  }
+
+  private formatDate(dateString: string): string {
+    if (!dateString) {
+      return ''; // Return an empty string if the date is not valid
+    }
+    const formattedDate = this.datePipe.transform(dateString, 'yyyy-MM-dd');
+    return formattedDate || ''; // Use Angular's DatePipe to format the date
+  }
 
 }

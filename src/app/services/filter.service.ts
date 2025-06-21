@@ -1,4 +1,4 @@
-import { Periodo, Ruta, Contrato, Gerencia, Tarifa, Localidad, Status } from './../models/filters';
+import { Periodo, Ruta, Contrato, Gerencia, Tarifa, Localidad, Status, Cajas } from './../models/filters';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
@@ -9,8 +9,8 @@ import { Filter, Sector } from '../models/filters';
 })
 export class FilterService {
 
-  private apiUrl = 'https://reporteador.japama.net/api';
-  //private apiUrl ='http://127.0.0.1:8000/api';
+  //private apiUrl = 'https://reporteador.japama.net/api';
+  private apiUrl ='http://127.0.0.1:8000/api';
 
 
   private filterDataSubject = new BehaviorSubject<any>(null);
@@ -342,6 +342,78 @@ export class FilterService {
       });
   }
 
+  downloadExcelRecaudacionPorCaja(
+    filtros: any
+  ): void {
+    this.setLoadingState(true);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    this.http
+      .post(`${this.apiUrl}/excel_recaudacion_caja`, filtros, {
+        headers,
+        responseType: 'blob',
+      })
+      .subscribe({
+        next: (response: Blob) => {
+          const blob = new Blob([response], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Recaudacion Por Caja ${filtros.LOCALIDAD_NOMBRE} ${filtros.FECHA_PAGO}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          this.setLoadingState(false);
+        },
+        error: (error) => {
+          console.error('Error al descargar el archivo:', error);
+          alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
+        },
+      });
+  }
+
+  downloadExcelRecaudacionCajaConceptos(
+    filtros: any
+  ): void {
+    this.setLoadingState(true);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    this.http
+      .post(`${this.apiUrl}/excel_recaudacion_caja_conceptos`, filtros, {
+        headers,
+        responseType: 'blob',
+      })
+      .subscribe({
+        next: (response: Blob) => {
+          const blob = new Blob([response], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Recaudacion Por Caja Conceptos ${filtros.COMUNIDAD} - ${filtros.FECHA_INI} - ${filtros.FECHA_FIN}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          this.setLoadingState(false);
+        },
+        error: (error) => {
+          console.error('Error al descargar el archivo:', error);
+          alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
+        },
+      });
+  }
+
   downloadExcelResumenFacturacion(
     filtros: any
   ): void {
@@ -558,4 +630,29 @@ export class FilterService {
         })
       );
     }
+
+    /**
+   * Obtiene la lista de cajas desde el servidor.
+   * @returns Observable con un arreglo de cajas.
+   */
+    getCajas(): Observable<Cajas[]> {
+      return this.http.get<Cajas[]>(`${this.apiUrl}/caja`).pipe(
+        catchError((error) => {
+          return throwError(() => new Error('Error al obtener cajas.'));
+        })
+      );
+    }
+
+    /**
+     * 
+     * @returns Observable con un arreglo de conceptos.
+     */
+    getConceptos(): Observable<Cajas[]> {
+      return this.http.get<Cajas[]>(`${this.apiUrl}/conceptos`).pipe(
+        catchError((error) => {
+          return throwError(() => new Error('Error al obtener cajas.'));
+        })
+      );
+    }
+
 }

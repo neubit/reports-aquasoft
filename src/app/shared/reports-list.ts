@@ -45,6 +45,8 @@ export const listOfReports = [
     value: 'verLectura',
     endpoint: 'reporte_verificador_de_lectura',
   },
+  { label: 'Recaudacion Por Caja', value: 'recaudacionPorCaja', endpoint: 'reporte_recaudacion_caja' },
+  {label: 'Recaudacion Caja Conceptos', value: 'recaudacionCajaConceptos', endpoint: 'recaudacion_caja_conceptos' },
   {
     label: 'Reporte Cartera',
     value: 'reporteCartera',
