@@ -46,7 +46,33 @@
       }
     </div>
 
-      @if(typeReport !== 'recaudacionPorCaja') {
+    @if(typeReport === 'facturacionPorConceptos') {
+      <div nz-col nzSpan="24" nz-flex nzVertical="true">
+        <span nz-typography><strong>PERIODO INICIO*</strong></span>
+        <nz-select formControlName="periodoStart" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..." (ngModelChange)="onPeriodoStartChange($event)">
+          @for (item of periodos; track item) {
+            <nz-option [nzLabel]="item.name" [nzValue]="item.rowid"></nz-option>
+          }
+        </nz-select>
+        @if(showError('periodo')) {
+          <div style="color: red">El campo Periodo es obligatorio.</div>
+        }
+      </div>
+
+      <div nz-col nzSpan="24" nz-flex nzVertical="true">
+        <span nz-typography><strong>PERIODO FIN*</strong></span>
+        <nz-select formControlName="periodoEnd" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..." [nzDisabled]="!filterForm.get('periodoStart')?.value">
+          @for (item of periodosDelimitados; track item) {
+            <nz-option [nzLabel]="item.name" [nzValue]="item.rowid"></nz-option>
+          }
+        </nz-select>
+        @if(showError('periodo')) {
+          <div style="color: red">El campo Periodo es obligatorio.</div>
+        }
+      </div>
+    }
+
+      @if(typeReport !== 'recaudacionPorCaja' && typeReport !== 'facturacionPorConceptos') {
         <div nz-col nzSpan="24" nz-flex nzVertical="true">
           <span nz-typography><strong>SECTOR*</strong></span>
           <nz-select formControlName="sector" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."

@@ -7,12 +7,8 @@ export const REQUIRED_FIELDS: { [key: string]: string[] } = {
   noServicios: ['localidad', 'startDate', 'endDate'],
   noAdeudo: ['localidad', 'startDate', 'endDate'],
   instalaciones: ['localidad', 'startDate', 'endDate'],
-  facturacion: [
-    'periodo',
-    'localidad',
-    'sistema',
-    'sector'
-  ],
+  facturacion: ['periodo','localidad','sistema','sector'],
+  facturacionPorConceptos:['localidad', 'periodoStart', 'periodoEnd'],
   contratosNuevos: [],
   recaudacionPorCaja: ['localidad', 'caja', 'fechaPago'],
   recaudacionCajaConceptos: ['localidad', 'caja', ''],
@@ -20,3 +16,5 @@ export const REQUIRED_FIELDS: { [key: string]: string[] } = {
   resumenFacturacion: ['periodo', 'localidades',],
   verLectura: ['periodo', 'localidad', 'sector', 'rutas'],
 };
+
+

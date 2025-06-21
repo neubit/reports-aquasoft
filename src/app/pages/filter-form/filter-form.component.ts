@@ -62,6 +62,7 @@ export class FilterFormComponent implements OnInit {
   listOfReports = listOfReports;
 
   periodos: Periodo[] = [];
+  periodosDelimitados: Periodo[] = [];
   localidades: Localidad[] = [];
   sectores: Sector[] = [];
   rutas: Ruta[] = [];
@@ -86,6 +87,7 @@ export class FilterFormComponent implements OnInit {
   reporteCarteraSuccess = false;
   recaudacionPorCajaSuccess = false;
   recaudacionCajaConceptosSuccess = false;
+  facturacionPorConceptosSuccess = false;
 
   private requiredFields = REQUIRED_FIELDS;
 
@@ -116,6 +118,8 @@ export class FilterFormComponent implements OnInit {
         caja: new FormControl<string>(''),
         paymentDate: new FormControl<string>(''),
         conceptos: new FormControl<Array<string>>([]),
+        periodoStart: new FormControl<number>(0),
+        periodoEnd: new FormControl<number>(0),
       },
       { validators: this.dateRangeValidator }
     );
@@ -320,6 +324,14 @@ export class FilterFormComponent implements OnInit {
           "FECHA_INI": this.formatDate(formValue.startDate),
           "FECHA_FIN": this.formatDate(formValue.endDate),
       }
+    } else if (this.typeReport === 'facturacionPorConceptos') {
+       filtros = {
+        "LOCALIDAD_ID": formValue.localidad,
+        "PERIODO_INI": formValue.periodoStart,
+        "PERIODO_FIN": formValue.periodoEnd,
+        "PERIODO_INI_NAME": formValue.periodoStart ? this.periodos.find((p) => p.rowid === formValue.periodoStart)?.name || '' : '',
+        "PERIODO_FIN_NAME": formValue.periodoEnd ? this.periodos.find((p) => p.rowid === formValue.periodoEnd)?.name || '' : '',
+      };
     }
 
     const reportApi = this.listOfReports.find(
@@ -416,6 +428,20 @@ export class FilterFormComponent implements OnInit {
     this.filterService.downloadExcelFacturacion(filtros);
   }
 
+  downloadExcelFacturacionPorConceptos() {
+    const f = this.filterForm.value;
+
+    const filtros = {
+      "LOCALIDAD_ID": f.localidad,
+      "PERIODO_INI": f.periodoStart,
+      "PERIODO_FIN": f.periodoEnd,
+      "PERIODO_INI_NAME": f.periodoStart ? this.periodos.find((p) => p.rowid === f.periodoStart)?.name || '' : '',
+      "PERIODO_FIN_NAME": f.periodoEnd ? this.periodos.find((p) => p.rowid === f.periodoEnd)?.name || '' : '',
+    };
+
+    this.filterService.downloadExcelFacturacionPorConceptos(filtros);
+  }
+
   downloadExcelRecaudacionPorCaja() {
     const f = this.filterForm.value;
 
@@ -506,6 +532,7 @@ export class FilterFormComponent implements OnInit {
         reporteCartera: 'reporteCarteraSuccess',
         recaudacionPorCaja: 'recaudacionPorCajaSuccess',
         recaudacionCajaConceptos: 'recaudacionCajaConceptosSuccess',
+        facturacionPorConceptos: 'facturacionPorConceptosSuccess'
       };
 
       const successKey = successMap[this.typeReport];
@@ -611,7 +638,8 @@ export class FilterFormComponent implements OnInit {
       'verLectura': this.verLecturaSuccess,
       'reporteCartera': this.reporteCarteraSuccess,
       'recaudacionPorCaja': this.recaudacionPorCajaSuccess,
-      'recaudacionCajaConceptos': this.recaudacionCajaConceptosSuccess
+      'recaudacionCajaConceptos': this.recaudacionCajaConceptosSuccess,
+      'facturacionPorConceptos': this.facturacionPorConceptosSuccess
     };
 
     return !!successMap[this.typeReport as keyof typeof successMap];
@@ -632,7 +660,8 @@ export class FilterFormComponent implements OnInit {
       'verLectura': this.downloadExcelVerLectura.bind(this),
       'reporteCartera': this.downloadExcelReporteCartera.bind(this),
       'recaudacionPorCaja': this.downloadExcelRecaudacionPorCaja.bind(this),
-      'recaudacionCajaConceptos': this.downloadExcelRecaudacionCajaConceptos.bind(this)
+      'recaudacionCajaConceptos': this.downloadExcelRecaudacionCajaConceptos.bind(this),
+      'facturacionPorConceptos': this.downloadExcelFacturacionPorConceptos.bind(this)
     };
 
     return downloadMap[this.typeReport] || (() => { });
@@ -648,6 +677,13 @@ export class FilterFormComponent implements OnInit {
     return Array.isArray(selectedList) ? selectedList.length : 0;
   }
 
+  onPeriodoStartChange(startPeriodo: number) { 
+    this.filterForm.get('periodoEnd')?.setValue('');
+    this.periodosDelimitados = this.periodos
+    .filter((p) => p.rowid >= startPeriodo)
+    .slice(-12);
+  }  
+
   private resetExcelsFlags() {
     this.contratosNuevosSuccess = false;
     this.anexo13Success = false;
@@ -661,6 +697,7 @@ export class FilterFormComponent implements OnInit {
     this.reporteCarteraSuccess = false;
     this.recaudacionPorCajaSuccess = false;
     this.recaudacionCajaConceptosSuccess = false;
+    this.facturacionPorConceptosSuccess = false;
   }
 
   private dateRangeValidator(
