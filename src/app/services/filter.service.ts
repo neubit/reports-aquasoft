@@ -9,8 +9,8 @@ import { Filter, Sector } from '../models/filters';
 })
 export class FilterService {
 
-  //private apiUrl = 'https://reporteador.japama.net/api';
-  private apiUrl ='http://127.0.0.1:8000/api';
+  private apiUrl = 'https://reporteador.japama.net/api';
+  //private apiUrl ='http://127.0.0.1:8000/api';
 
 
   private filterDataSubject = new BehaviorSubject<any>(null);

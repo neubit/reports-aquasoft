@@ -35,6 +35,6 @@ export class AppComponent implements OnInit {
     const isWhitelisted = whitelist.includes(currentHost);
     const isInIframe = window.self !== window.top;
   
-    this.inIframe = !isInIframe;
+    this.inIframe = isInIframe;
   }
 }
