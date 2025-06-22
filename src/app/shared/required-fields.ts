@@ -9,6 +9,7 @@ export const REQUIRED_FIELDS: { [key: string]: string[] } = {
   instalaciones: ['localidad', 'startDate', 'endDate'],
   facturacion: ['periodo','localidad','sistema','sector'],
   facturacionPorConceptos:['localidad', 'periodoStart', 'periodoEnd'],
+  facturacionVolumen: ['periodoStart', 'periodoEnd', 'localidades'],
   contratosNuevos: [],
   recaudacionPorCaja: ['localidad', 'caja', 'fechaPago'],
   recaudacionCajaConceptos: ['localidad', 'caja', ''],

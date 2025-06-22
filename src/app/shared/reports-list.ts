@@ -41,6 +41,7 @@ export const listOfReports = [
   // },
   { label: 'Facturación', value: 'facturacion', endpoint: 'reporte_facturacion' },
   { label: 'Facturación Por Conceptos', value: 'facturacionPorConceptos', endpoint: 'facturacion_por_conceptos' },
+  { label: 'Facturación por Volumen', value: 'facturacionVolumen', endpoint: 'volumen_facturacion' },
   {
     label: 'Verificador de Lectura',
     value: 'verLectura',

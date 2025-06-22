@@ -88,6 +88,7 @@ export class FilterFormComponent implements OnInit {
   recaudacionPorCajaSuccess = false;
   recaudacionCajaConceptosSuccess = false;
   facturacionPorConceptosSuccess = false;
+  facturacionVolumenSuccess = false;
 
   private requiredFields = REQUIRED_FIELDS;
 
@@ -332,7 +333,15 @@ export class FilterFormComponent implements OnInit {
         "PERIODO_INI_NAME": formValue.periodoStart ? this.periodos.find((p) => p.rowid === formValue.periodoStart)?.name || '' : '',
         "PERIODO_FIN_NAME": formValue.periodoEnd ? this.periodos.find((p) => p.rowid === formValue.periodoEnd)?.name || '' : '',
       };
-    }
+  } else if (this.typeReport === 'facturacionVolumen') {
+    filtros = {
+      'LOCALIDAD_ID': formValue.localidades.join(',') || '',
+      'PERIODO_INI': formValue.periodoStart,
+      'PERIODO_FIN': formValue.periodoEnd,
+      "PERIODO_INI_NAME": formValue.periodoStart ? this.periodos.find((p) => p.rowid === formValue.periodoStart)?.name || '' : '',
+      "PERIODO_FIN_NAME": formValue.periodoEnd ? this.periodos.find((p) => p.rowid === formValue.periodoEnd)?.name || '' : '',
+    };
+  }
 
     const reportApi = this.listOfReports.find(
       (r) => r.value === formValue.report
@@ -442,6 +451,20 @@ export class FilterFormComponent implements OnInit {
     this.filterService.downloadExcelFacturacionPorConceptos(filtros);
   }
 
+  downloadExcelFacturacionVolumen() {
+    const f = this.filterForm.value;
+
+    const filtros = {
+      "LOCALIDAD_ID": f.localidades.join(',') || '',
+      "PERIODO_INI": f.periodoStart,
+      "PERIODO_FIN": f.periodoEnd,
+      "PERIODO_INI_NAME": f.periodoStart ? this.periodos.find((p) => p.rowid === f.periodoStart)?.name || '' : '',
+      "PERIODO_FIN_NAME": f.periodoEnd ? this.periodos.find((p) => p.rowid === f.periodoEnd)?.name || '' : '',
+    };
+
+    this.filterService.downloadExcelFacturacionVolumen(filtros);
+  }
+
   downloadExcelRecaudacionPorCaja() {
     const f = this.filterForm.value;
 
@@ -532,7 +555,8 @@ export class FilterFormComponent implements OnInit {
         reporteCartera: 'reporteCarteraSuccess',
         recaudacionPorCaja: 'recaudacionPorCajaSuccess',
         recaudacionCajaConceptos: 'recaudacionCajaConceptosSuccess',
-        facturacionPorConceptos: 'facturacionPorConceptosSuccess'
+        facturacionPorConceptos: 'facturacionPorConceptosSuccess',
+        facturacionVolumen: 'facturacionVolumenSuccess'
       };
 
       const successKey = successMap[this.typeReport];
@@ -639,7 +663,8 @@ export class FilterFormComponent implements OnInit {
       'reporteCartera': this.reporteCarteraSuccess,
       'recaudacionPorCaja': this.recaudacionPorCajaSuccess,
       'recaudacionCajaConceptos': this.recaudacionCajaConceptosSuccess,
-      'facturacionPorConceptos': this.facturacionPorConceptosSuccess
+      'facturacionPorConceptos': this.facturacionPorConceptosSuccess,
+      'facturacionVolumen': this.facturacionVolumenSuccess
     };
 
     return !!successMap[this.typeReport as keyof typeof successMap];
@@ -661,7 +686,8 @@ export class FilterFormComponent implements OnInit {
       'reporteCartera': this.downloadExcelReporteCartera.bind(this),
       'recaudacionPorCaja': this.downloadExcelRecaudacionPorCaja.bind(this),
       'recaudacionCajaConceptos': this.downloadExcelRecaudacionCajaConceptos.bind(this),
-      'facturacionPorConceptos': this.downloadExcelFacturacionPorConceptos.bind(this)
+      'facturacionPorConceptos': this.downloadExcelFacturacionPorConceptos.bind(this),
+      'facturacionVolumen': this.downloadExcelFacturacionVolumen.bind(this)
     };
 
     return downloadMap[this.typeReport] || (() => { });
@@ -698,6 +724,7 @@ export class FilterFormComponent implements OnInit {
     this.recaudacionPorCajaSuccess = false;
     this.recaudacionCajaConceptosSuccess = false;
     this.facturacionPorConceptosSuccess = false;
+    this.facturacionVolumenSuccess = false;
   }
 
   private dateRangeValidator(

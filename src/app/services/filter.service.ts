@@ -9,8 +9,8 @@ import { Filter, Sector } from '../models/filters';
 })
 export class FilterService {
 
-  private apiUrl = 'https://reporteador.japama.net/api';
- //private apiUrl ='http://127.0.0.1:8000/api';
+  //private apiUrl = 'https://reporteador.japama.net/api';
+  private apiUrl ='http://127.0.0.1:8000/api';
 
 
   private filterDataSubject = new BehaviorSubject<any>(null);
@@ -362,7 +362,42 @@ export class FilterService {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `Facturacion ${filtros.PERIODO_INI_NAME} - ${filtros.PERIODO_FIN_NAME}.xlsx`;
+          a.download = `Facturacion Conceptos ${filtros.PERIODO_INI_NAME} - ${filtros.PERIODO_FIN_NAME}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          this.setLoadingState(false);
+        },
+        error: (error) => {
+          console.error('Error al descargar el archivo:', error);
+          alert('Hubo un error al descargar el archivo.');
+          this.setLoadingState(false);
+        },
+      });
+  }
+
+  downloadExcelFacturacionVolumen( filtros: any
+  ): void {
+    this.setLoadingState(true);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    this.http
+      .post(`${this.apiUrl}/excel_volumen_facturacion`, filtros, {
+        headers,
+        responseType: 'blob',
+      })
+      .subscribe({
+        next: (response: Blob) => {
+          const blob = new Blob([response], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Facturacion Volumen ${filtros.PERIODO_INI_NAME} - ${filtros.PERIODO_FIN_NAME}.xlsx`;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
