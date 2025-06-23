@@ -16,26 +16,27 @@
 
   @if(typeReport !== 'contratosNuevos') {
   <!-- Period Field (Conditional) -->
-    @if(shouldShowPeriodField()) {
-    <div nz-col nzSpan="24" nz-flex nzVertical="true">
-      <span nz-typography><strong>PERIODO*</strong></span>
-      <nz-select formControlName="periodo" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
-        @for (item of periodos; track item) {
-        <nz-option [nzLabel]="item.name" [nzValue]="item.rowid"></nz-option>
-        }
-      </nz-select>
-      @if(showError('periodo')) {
-      <div style="color: red">El campo Periodo es obligatorio.</div>
+  @if(shouldShowPeriodField()) {
+  <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    <span nz-typography><strong>PERIODO*</strong></span>
+    <nz-select formControlName="periodo" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+      @for (item of periodos; track item) {
+      <nz-option [nzLabel]="item.name" [nzValue]="item.rowid"></nz-option>
       }
-    </div>
+    </nz-select>
+    @if(showError('periodo')) {
+    <div style="color: red">El campo Periodo es obligatorio.</div>
     }
+  </div>
+  }
 
   <!-- Contract Type Fields (Conditional) -->
   @if(shouldShowContractFields()) {
     @if(typeReport !== 'resumenFacturacion' && typeReport !== 'reporteCartera' && typeReport !== 'recaudacionCajaConceptos') {
-      
-      @if(typeReport === 'facturacionPorConceptos') {
-      <div nz-col nzSpan="24" nz-flex nzVertical="true">
+    
+    
+      @if(typeReport !== 'facturacionVolumen') {  
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
         <span nz-typography><strong>LOCALIDAD*</strong></span>
         <nz-select formControlName="localidad" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..."
           (ngModelChange)="onLocalidadChange($event)">
@@ -46,28 +47,28 @@
         @if(showError('localidad')) {
         <div style="color: red">El campo Localidad es obligatorio.</div>
         }
-      </div>
-    }
+    </div>
+  }
     @if(typeReport === 'facturacionVolumen') {
-        <!-- Localidades Select -->
-        <div nz-col nzSpan="24" nz-flex nzVertical="true">
-          <span nz-typography><strong>LOCALIDAD/ES*</strong></span>
-          <nz-select formControlName="localidades" [nzMaxTagCount]="3" [nzMaxTagPlaceholder]="tagPlaceHolderLocalidades"
-            nzMode="multiple" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
-            @for (item of localidades; track item) {
-            <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
-            }
-          </nz-select>
-          <ng-template #tagPlaceHolderLocalidades let-selectedList>
-            y {{ getSelectedCount(selectedList) }} más seleccionados
-          </ng-template>
-          @if (showError('localidades')) {
-          <div style="color: red">El campo localidades es obligatorio.</div>
-          }
-        </div>
+    <div nz-col nzSpan="24" nz-flex nzVertical="true">
+      <span nz-typography><strong>LOCALIDAD/ES*</strong></span>
+      <nz-select formControlName="localidades" [nzMaxTagCount]="3" [nzMaxTagPlaceholder]="tagPlaceHolderLocalidades"
+        nzMode="multiple" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona...">
+        @for (item of localidades; track item) {
+        <nz-option [nzLabel]="item.label" [nzValue]="item.rowid"></nz-option>
+        }
+      </nz-select>
+      <ng-template #tagPlaceHolderLocalidades let-selectedList>
+        y {{ getSelectedCount(selectedList) }} más seleccionados
+      </ng-template>
+      @if (showError('localidades')) {
+      <div style="color: red">El campo localidades es obligatorio.</div>
       }
+    </div>
+  }
 
     @if(typeReport === 'facturacionPorConceptos' || typeReport === 'facturacionVolumen') {
+
       <div nz-col nzSpan="24" nz-flex nzVertical="true">
         <span nz-typography><strong>PERIODO INICIO*</strong></span>
         <nz-select formControlName="periodoStart" nzShowSearch nzAllowClear nzPlaceHolder="Selecciona..." (ngModelChange)="onPeriodoStartChange($event)">

@@ -710,6 +710,37 @@ export class FilterFormComponent implements OnInit {
     .slice(-12);
   }  
 
+  // onContractChange(rowid: any): void {
+  //   let contractType = '';
+
+  //   if (Array.isArray(rowid)) {
+  //     // Convert array of rowids to a comma-separated string
+  //     const selectedContracts = this.contratos.filter(c => rowid.includes(c.rowid));
+  //     contractType = selectedContracts.map(c => c.type).join(',');
+  //   } else {
+  //     // Handle single value
+  //     const contratoSeleccionado = this.contratos.find(c => c.rowid === rowid);
+  //     contractType = contratoSeleccionado?.type || '';
+  //   }
+
+  //   if (contractType) {
+  //     this.filterForm.get('tipoTarifa')?.setValue('');
+  //     this.filterForm.get('tipoTarifas')?.setValue([]);
+  //     this.filterService
+  //       .getTarifas(contractType)
+  //       .pipe(catchError(() => []))
+  //       .subscribe((tarifa: Tarifa[]) => {
+  //         this.tarifas = tarifa;
+  //         this.filterForm.get('tipoTarifa')?.enable();
+  //         this.filterForm.get('tipoTarifas')?.enable();
+  //       });
+  //   } else {
+  //     this.tarifas = [];
+  //     this.filterForm.get('tipoTarifa')?.disable();
+  //     this.filterForm.get('tipoTarifas')?.disable();
+  //   }
+  // }
+
   private resetExcelsFlags() {
     this.contratosNuevosSuccess = false;
     this.anexo13Success = false;

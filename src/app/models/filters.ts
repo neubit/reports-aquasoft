@@ -38,6 +38,7 @@ export interface Sector {
 export interface Contrato {
   rowid: number;
   code: string;
+  type?: string;
   label: string;
 }
 
